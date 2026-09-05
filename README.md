@@ -1,6 +1,6 @@
 # barney
 
-Yet another feckin' tool to build a Linux distro - from Ikey Doherty - again.
+Yet another feckin' tool to build a Linux distro.
 
 Note: while the tool will be capable of **producing** a distribution from a meta recipe style, a distro is not actually the aim. Instead we're going through the concepts of OS/distro design and theory, which should additionally prove beneficial to the maintainers of tooling in **existing distributions**.
 
