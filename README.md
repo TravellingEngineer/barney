@@ -8,7 +8,7 @@ This tool is being developed exclusively for my YouTube content series to show t
 
 ## Motivation
 
-I was motivated out of retirememt effectively through disgust and astonishment. Initially dumbfounded by the absurdity of Omarchy receiving approx. $13MN in funding for essentially a respin, I then learned of the views of DHH.
+I was motivated out of retirement effectively through disgust and astonishment. Initially dumbfounded by the absurdity of Omarchy receiving approx. $13MN in funding for essentially a respin, I then learned of the views of DHH.
 
 As an Irish Traveller, I strongly condemn such rhetoric against **any** nomadic people
 
