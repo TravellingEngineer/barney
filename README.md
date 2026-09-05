@@ -2,6 +2,8 @@
 
 Yet another feckin' tool to build a Linux distro.
 
+See: [DESIGN.md](DESIGN.md)
+
 Note: while the tool will be capable of **producing** a distribution from a meta recipe style, a distro is not actually the aim. Instead we're going through the concepts of OS/distro design and theory, which should additionally prove beneficial to the maintainers of tooling in **existing distributions**.
 
 This tool is being developed exclusively for my YouTube content series to show the world how real distros are actually built. Yknow, not a "wallpaper respin" but the meat and guts of it all.
