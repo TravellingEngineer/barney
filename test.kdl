@@ -1,0 +1,6 @@
+// only here for metadata matching right now
+// execution stages will be procedural rather than
+// "real scripts"
+name "llvm"
+version "23.1.0"
+homepage "https://llvm.org"
