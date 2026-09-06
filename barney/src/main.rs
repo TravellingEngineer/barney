@@ -1,3 +1,9 @@
+use clap::Parser;
+
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+struct CliEntry {}
+
 fn main() {
-    println!("Hello, world!");
+    let _ = CliEntry::parse();
 }
