@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2026 Ikey Doherty
 // SPDX-License-Identifier: MPL-2.0
 
+use std::path::PathBuf;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -13,7 +15,7 @@ struct CliEntry {
 #[derive(Subcommand)]
 enum Commands {
     /// Build the distro
-    Build { distro: Option<String> },
+    Build { distro: Option<PathBuf> },
 }
 
 fn main() {
