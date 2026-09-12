@@ -3,6 +3,7 @@
 
 //! Brogstrapa profiles
 
+use itertools::Itertools;
 use kdl::KdlNode;
 use thiserror::Error;
 
@@ -16,10 +17,32 @@ pub enum Error {
 
     #[error("missing name")]
     MissingName,
+
+    #[error("expected one entry only")]
+    ExactlyOne,
 }
 
 impl Profile {
-    pub(super) fn from_node(_node: &KdlNode) -> Result<Self, Error> {
+    pub(super) fn from_node(node: &KdlNode) -> Result<Self, Error> {
+        let attr = node
+            .entries()
+            .iter()
+            .exactly_one()
+            .map_err(|_| Error::ExactlyOne)?;
+
+        // TODO: ParserError::UnexpectedProperty
+        if attr.name().is_some() {
+            return Err(Error::MissingName);
+        }
+
+        // TODO: ParserError::UnexpectedType
+        if !attr.value().is_string() {
+            return Err(Error::MissingName);
+        }
+
+        let a = attr.value().as_string().ok_or(Error::MissingName)?;
+        eprintln!("Got a profile \"{}\"", a);
+
         Err(Error::Unimplemented)
     }
 }
