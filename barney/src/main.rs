@@ -1,12 +1,25 @@
 // SPDX-FileCopyrightText: 2026 Ikey Doherty
 // SPDX-License-Identifier: MPL-2.0
 
-use clap::Parser;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
-struct CliEntry {}
+struct CliEntry {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Build the distro
+    Build { distro: Option<String> },
+}
 
 fn main() {
-    let _ = CliEntry::parse();
+    let cli = CliEntry::parse();
+
+    match &cli.command {
+        Commands::Build { distro: _ } => todo!(),
+    }
 }
