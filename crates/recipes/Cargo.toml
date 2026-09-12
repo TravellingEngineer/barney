@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+itertools.workspace = true
 kdl.workspace = true
 miette.workspace = true
 thiserror.workspace = true
