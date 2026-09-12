@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 kdl.workspace = true
 miette.workspace = true
+thiserror.workspace = true
