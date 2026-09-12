@@ -102,6 +102,7 @@ name = "barney"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "recipes",
 ]
 
 [[package]]
@@ -491,7 +492,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "recipe"
+name = "recipes"
 version = "0.1.0"
 dependencies = [
  "kdl",
