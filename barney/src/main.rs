@@ -4,7 +4,6 @@
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use miette::IntoDiagnostic;
 use recipes::distro::Brogstrappa;
 
 #[derive(Parser)]
@@ -26,7 +25,7 @@ fn main() -> miette::Result<()> {
     match &cli.command {
         Commands::Build { distro } => {
             let distro = distro.clone().unwrap_or(PathBuf::from("distro.kdl"));
-            let distro = Brogstrappa::from_path(&distro).into_diagnostic()?;
+            let distro = Brogstrappa::from_path(&distro)?;
             eprintln!("Have distro: {distro:?}");
         }
     }
