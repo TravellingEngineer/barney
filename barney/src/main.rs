@@ -24,6 +24,7 @@ fn main() -> miette::Result<()> {
 
     match &cli.command {
         Commands::Build { distro } => {
+            // TODO: Only use miette result reporting for where it matters, ie loading KDL
             let distro = distro.clone().unwrap_or(PathBuf::from("distro.kdl"));
             let distro = Brogstrappa::from_path(&distro)?;
             eprintln!("Have distro: {distro:?}");
