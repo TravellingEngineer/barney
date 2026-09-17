@@ -11,7 +11,9 @@ use tracing::trace;
 use crate::distro::syntax;
 
 #[derive(Debug)]
-pub struct Profile {}
+pub struct Profile {
+    id: String,
+}
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
@@ -35,5 +37,10 @@ impl Profile {
         let name = syntax::get_node_id(node)?;
         trace!(name = name, "loading profile");
         Err(Error::Unimplemented { span: node.span() })
+    }
+
+    /// Returns the profile ID
+    pub fn id(&self) -> &str {
+        &self.id
     }
 }
