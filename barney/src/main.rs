@@ -61,7 +61,7 @@ async fn main() {
         // handle build command
         Commands::Build { distro } => {
             let distro = distro.clone().unwrap_or(PathBuf::from("distro.kdl"));
-            command_build(&distro)
+            command_build(&distro).await
         }
     };
 
@@ -69,7 +69,7 @@ async fn main() {
 }
 
 // Load distro config, handle emission of miette report if needed
-fn command_build(path: &Path) -> ExitCode {
+async fn command_build(path: &Path) -> ExitCode {
     // Ensure we have a real path firstly!
     let path = match path.canonicalize() {
         Ok(path) => path,
