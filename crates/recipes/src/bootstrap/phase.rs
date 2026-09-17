@@ -8,7 +8,7 @@ use miette::Diagnostic;
 use thiserror::Error;
 use tracing::trace;
 
-use super::syntax;
+use crate::syntax;
 
 #[derive(Debug)]
 pub struct Phase {

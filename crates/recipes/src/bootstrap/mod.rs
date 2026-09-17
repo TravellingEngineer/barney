@@ -11,7 +11,6 @@ use thiserror::Error;
 
 mod phase;
 pub use phase::Phase;
-pub mod syntax;
 
 /// A distro definition is taken from a bootstrap.kdl
 ///
