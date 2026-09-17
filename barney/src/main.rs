@@ -1,12 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Ikey Doherty
 // SPDX-License-Identifier: MPL-2.0
 
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
+use barney::build;
 use clap::{Parser, Subcommand};
-use recipes::bootstrap::BootstrapSpec;
-use tracing::{error, info};
-use tracing_indicatif::{IndicatifLayer, suspend_tracing_indicatif};
+use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[derive(Parser)]
@@ -14,14 +13,6 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 struct CliEntry {
     #[command(subcommand)]
     command: Commands,
-}
-
-// TODO: Add proper codes for our app xD
-#[repr(i32)]
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ExitCode {
-    Normal = 0,
-    Abnormal,
 }
 
 #[derive(Subcommand)]
@@ -61,36 +52,9 @@ async fn main() {
         // handle build command
         Commands::Build { path } => {
             let path = path.clone().unwrap_or(PathBuf::from("bootstrap.kdl"));
-            command_build(&path).await
+            build::run_command(&path).await
         }
     };
 
     std::process::exit(exit_code as i32)
-}
-
-// Load bootstrap config, handle emission of miette report if needed
-async fn command_build(path: &Path) -> ExitCode {
-    // Ensure we have a real path firstly!
-    let path = match path.canonicalize() {
-        Ok(path) => path,
-        Err(e) => {
-            error!(path = ?&path, error = ?e, "Failed to canonicalize config path");
-            return ExitCode::Abnormal;
-        }
-    };
-
-    // Load the bootstrap configuration
-    let _distro = match BootstrapSpec::from_path(&path) {
-        Ok(d) => d,
-        Err(e) => {
-            let report = miette::Report::new(e);
-            error!(config = ?path, "Failed to load bootstrap configuration");
-            suspend_tracing_indicatif(|| {
-                eprintln!("{report:?}");
-            });
-            return ExitCode::Abnormal;
-        }
-    };
-    info!(config = ?path, "Loaded distro configuration");
-    ExitCode::Normal
 }
