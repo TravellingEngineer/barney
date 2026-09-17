@@ -19,7 +19,9 @@ enum Commands {
     Build { distro: Option<PathBuf> },
 }
 
-fn main() -> miette::Result<()> {
+/// Main entry point
+#[tokio::main]
+async fn main() -> miette::Result<()> {
     let cli = CliEntry::parse();
 
     match &cli.command {
