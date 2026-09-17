@@ -28,8 +28,8 @@ phase stage0 {
 module env {
   variables {
     // (var)env::target
-    target (var)profile::target
-    prefix (var)profile::prefix
+    target (var)phase::target
+    prefix (var)phase::prefix
   }
 
   // exported into the shell environment
