@@ -15,9 +15,8 @@ pub mod syntax;
 
 /// A distro definition is taken from a bootstrap.kdl
 ///
-#[derive(Debug)]
 pub struct BootstrapSpec {
-    _phases: Vec<Phase>,
+    phases: Vec<Phase>,
 }
 
 #[derive(Diagnostic, Error, Debug)]
@@ -70,7 +69,7 @@ impl BootstrapSpec {
     /// Load a bootstrap definition (into AST) from a valid KDL document
     /// using the correct procedural lingo.
     pub fn new(source: &NamedSource<String>, doc: &KdlDocument) -> Result<Self, Error> {
-        let mut nodes = vec![];
+        let mut phases = vec![];
         for node in doc.nodes() {
             match node.name().value() {
                 "module" => {}
@@ -79,12 +78,17 @@ impl BootstrapSpec {
                         src: source.clone(),
                         source: e,
                     })?;
-                    nodes.push(node);
+                    phases.push(node);
                 }
                 _ => {}
             }
         }
 
-        Err(Error::Unimplemented)
+        Ok(Self { phases })
+    }
+
+    /// Access the underlying phases
+    pub fn phases(&self) -> &[Phase] {
+        self.phases.as_slice()
     }
 }

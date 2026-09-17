@@ -4,7 +4,7 @@
 //! Bootstrap phase
 
 use kdl::KdlNode;
-use miette::{Diagnostic, SourceSpan};
+use miette::Diagnostic;
 use thiserror::Error;
 use tracing::trace;
 
@@ -17,14 +17,6 @@ pub struct Phase {
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
-    /// TODO: Set fire to this crap
-    #[error("not yet implemented")]
-    #[diagnostic()]
-    Unimplemented {
-        #[label("not yet implemented!")]
-        span: SourceSpan,
-    },
-
     #[error(transparent)]
     #[diagnostic(transparent)]
     Syntax(#[from] syntax::Error),
@@ -32,11 +24,11 @@ pub enum Error {
 
 impl Phase {
     /// Build a distro::Phase from a KdlNode
-    #[tracing::instrument]
     pub(super) fn from_node(node: &KdlNode) -> Result<Self, Error> {
         let name = syntax::get_node_id(node)?;
-        trace!(name = name, "loading phase");
-        Err(Error::Unimplemented { span: node.span() })
+        trace!(name = name, "parsing bootstrap phase");
+
+        Ok(Self { id: name })
     }
 
     /// Returns the phase ID

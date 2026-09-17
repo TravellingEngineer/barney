@@ -33,7 +33,7 @@ enum Commands {
 // Initialisation of the tracing registry
 fn init_registry() {
     let ind = IndicatifLayer::new();
-    let env = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let env = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("trace"));
 
     // TODO: Use some kind of timer
     tracing_subscriber::registry()
