@@ -4,7 +4,7 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
-use recipes::distro::Brogstrappa;
+use recipes::distro::BootstrapSpec;
 use tracing::{error, info};
 use tracing_indicatif::{IndicatifLayer, suspend_tracing_indicatif};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
@@ -27,7 +27,7 @@ enum ExitCode {
 #[derive(Subcommand)]
 enum Commands {
     /// Build the distro
-    Build { distro: Option<PathBuf> },
+    Build { path: Option<PathBuf> },
 }
 
 // Initialisation of the tracing registry
@@ -59,16 +59,16 @@ async fn main() {
 
     let exit_code = match &cli.command {
         // handle build command
-        Commands::Build { distro } => {
-            let distro = distro.clone().unwrap_or(PathBuf::from("distro.kdl"));
-            command_build(&distro).await
+        Commands::Build { path } => {
+            let path = path.clone().unwrap_or(PathBuf::from("bootstrap.kdl"));
+            command_build(&path).await
         }
     };
 
     std::process::exit(exit_code as i32)
 }
 
-// Load distro config, handle emission of miette report if needed
+// Load bootstrap config, handle emission of miette report if needed
 async fn command_build(path: &Path) -> ExitCode {
     // Ensure we have a real path firstly!
     let path = match path.canonicalize() {
@@ -80,7 +80,7 @@ async fn command_build(path: &Path) -> ExitCode {
     };
 
     // Load the bootstrap configuration
-    let _distro = match Brogstrappa::from_path(&path) {
+    let _distro = match BootstrapSpec::from_path(&path) {
         Ok(d) => d,
         Err(e) => {
             let report = miette::Report::new(e);

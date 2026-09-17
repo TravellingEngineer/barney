@@ -13,11 +13,10 @@ mod phase;
 pub use phase::Phase;
 pub mod syntax;
 
-/// A Brogstrappa definition is taken from a brogstrappa.kdl
-/// You can blame Arjan van de Ven for this name
+/// A distro definition is taken from a bootstrap.kdl
 ///
 #[derive(Debug)]
-pub struct Brogstrappa {
+pub struct BootstrapSpec {
     _phases: Vec<Phase>,
 }
 
@@ -54,7 +53,7 @@ pub enum Error {
     Unimplemented,
 }
 
-impl Brogstrappa {
+impl BootstrapSpec {
     pub fn from_path(whence: &impl AsRef<Path>) -> Result<Self, Error> {
         let whence_path = whence.as_ref().to_string_lossy().to_string();
         let contents = fs::read_to_string(&whence_path)?;
@@ -65,10 +64,10 @@ impl Brogstrappa {
             src: source_code.clone(),
             source: e,
         })?;
-        Brogstrappa::new(&source_code, &kdl_doc)
+        BootstrapSpec::new(&source_code, &kdl_doc)
     }
 
-    /// Load a Brogstrappa definition (into AST) from a valid KDL document
+    /// Load a bootstrap definition (into AST) from a valid KDL document
     /// using the correct procedural lingo.
     pub fn new(source: &NamedSource<String>, doc: &KdlDocument) -> Result<Self, Error> {
         let mut nodes = vec![];
