@@ -1,11 +1,11 @@
 // SPDX-FileCopyrightText: 2026 Ikey Doherty
 // SPDX-License-Identifier: MPL-2.0
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
 use recipes::distro::Brogstrappa;
-use tracing::info;
+use tracing::{error, info};
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -14,6 +14,13 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 struct CliEntry {
     #[command(subcommand)]
     command: Commands,
+}
+
+// TODO: Add proper codes for our app xD
+#[repr(i32)]
+enum ExitCode {
+    Normal = 0,
+    Abnormal,
 }
 
 #[derive(Subcommand)]
@@ -45,19 +52,32 @@ fn init_registry() {
 
 /// Main entry point
 #[tokio::main]
-async fn main() -> miette::Result<()> {
+async fn main() {
     init_registry();
-    info!("Loading registry");
-
     let cli = CliEntry::parse();
 
-    match &cli.command {
+    let exit_code = match &cli.command {
+        // handle build command
         Commands::Build { distro } => {
-            // TODO: Only use miette result reporting for where it matters, ie loading KDL
             let distro = distro.clone().unwrap_or(PathBuf::from("distro.kdl"));
-            let distro = Brogstrappa::from_path(&distro)?;
-            eprintln!("Have distro: {distro:?}");
+            command_build(&distro)
         }
-    }
-    Ok(())
+    };
+
+    std::process::exit(exit_code as i32)
+}
+
+// Load distro config, handle emission of miette report if needed
+fn command_build(path: &Path) -> ExitCode {
+    let _distro = match Brogstrappa::from_path(&path) {
+        Ok(d) => d,
+        Err(e) => {
+            let report = miette::Report::new(e);
+            error!(config = ?path, "Failed to load bootstrap configuration");
+            eprintln!("{report:?}");
+            return ExitCode::Abnormal;
+        }
+    };
+    info!(config = ?path, "Loaded distro configuration");
+    ExitCode::Normal
 }
