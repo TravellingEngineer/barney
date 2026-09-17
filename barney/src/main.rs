@@ -4,7 +4,7 @@
 use std::path::{Path, PathBuf};
 
 use clap::{Parser, Subcommand};
-use recipes::distro::BootstrapSpec;
+use recipes::bootstrap::BootstrapSpec;
 use tracing::{error, info};
 use tracing_indicatif::{IndicatifLayer, suspend_tracing_indicatif};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
