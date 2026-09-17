@@ -18,6 +18,7 @@ struct CliEntry {
 
 // TODO: Add proper codes for our app xD
 #[repr(i32)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ExitCode {
     Normal = 0,
     Abnormal,
