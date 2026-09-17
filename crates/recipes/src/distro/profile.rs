@@ -8,17 +8,10 @@ use kdl::KdlNode;
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
 
+use crate::distro::syntax;
+
 #[derive(Debug)]
 pub struct Profile {}
-
-#[derive(Debug, Error, Diagnostic)]
-pub enum SyntaxError {
-    #[error("unexpected property")]
-    UnexpectedProperty {
-        #[label("This should not be a property")]
-        span: SourceSpan,
-    },
-}
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
@@ -39,7 +32,7 @@ pub enum Error {
 
     #[error(transparent)]
     #[diagnostic(transparent)]
-    Syntax(#[from] SyntaxError),
+    Syntax(#[from] syntax::Error),
 }
 
 impl Profile {
@@ -53,7 +46,7 @@ impl Profile {
 
         // TODO: ParserError::UnexpectedProperty
         if attr.name().is_some() {
-            return Err(SyntaxError::UnexpectedProperty { span: node.span() })?;
+            return Err(syntax::Error::UnexpectedProperty { span: node.span() })?;
         }
 
         // TODO: ParserError::UnexpectedType

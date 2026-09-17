@@ -11,6 +11,7 @@ use thiserror::Error;
 
 mod profile;
 pub use profile::Profile;
+pub mod syntax;
 
 /// A Brogstrappa definition is taken from a brogstrappa.kdl
 /// You can blame Arjan van de Ven for this name
