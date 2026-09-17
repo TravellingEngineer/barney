@@ -12,7 +12,7 @@
 
 // namespace support.
 // uses same approach as rust with `::` qualifiers
-phase stage0 {
+phase crosstools {
     variables {
       target "x86_64-linux-gnu"
       prefix "/usr"
