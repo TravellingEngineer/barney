@@ -73,7 +73,6 @@ impl Brogstrappa {
     pub fn new(source: &NamedSource<String>, doc: &KdlDocument) -> Result<Self, Error> {
         let mut nodes = vec![];
         for node in doc.nodes() {
-            eprintln!("node: {}", node.name().value());
             match node.name().value() {
                 "module" => {}
                 "profile" => {

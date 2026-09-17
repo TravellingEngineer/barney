@@ -6,6 +6,7 @@
 use kdl::KdlNode;
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
+use tracing::trace;
 
 use crate::distro::syntax;
 
@@ -29,9 +30,10 @@ pub enum Error {
 
 impl Profile {
     /// Build a distro::Profile from a KdlNode
+    #[tracing::instrument]
     pub(super) fn from_node(node: &KdlNode) -> Result<Self, Error> {
         let name = syntax::get_node_id(node)?;
-        eprintln!("name of profile: {name}");
+        trace!(name = name, "loading profile");
         Err(Error::Unimplemented { span: node.span() })
     }
 }

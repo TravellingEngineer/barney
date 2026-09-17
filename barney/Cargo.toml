@@ -7,3 +7,4 @@ edition = "2024"
 clap = { version = "4.6.6", features = ["derive"] }
 recipes = { path = "../crates/recipes" }
 miette = { workspace = true, features = ["fancy"]}
+tracing.workspace = true
