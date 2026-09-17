@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use barney::build;
 use clap::{Parser, Subcommand};
+use tokio::runtime;
 use tracing_indicatif::IndicatifLayer;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -42,9 +43,21 @@ fn init_registry() {
         .init();
 }
 
+/// Guarded main to enable future workers without bricking the
+/// architecture.
+fn main() {
+    // TODO: Slightly more graceful init of tokio please
+    let rt = runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap();
+
+    // Run internal async enabled runtime
+    rt.block_on(async move { priv_async_main().await });
+}
+
 /// Main entry point
-#[tokio::main]
-async fn main() {
+async fn priv_async_main() {
     init_registry();
     let cli = CliEntry::parse();
 
