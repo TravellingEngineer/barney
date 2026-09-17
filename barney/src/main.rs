@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 use clap::{Parser, Subcommand};
 use recipes::distro::Brogstrappa;
 use tracing::{error, info};
-use tracing_indicatif::IndicatifLayer;
+use tracing_indicatif::{IndicatifLayer, suspend_tracing_indicatif};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[derive(Parser)]
@@ -70,12 +70,24 @@ async fn main() {
 
 // Load distro config, handle emission of miette report if needed
 fn command_build(path: &Path) -> ExitCode {
+    // Ensure we have a real path firstly!
+    let path = match path.canonicalize() {
+        Ok(path) => path,
+        Err(e) => {
+            error!(path = ?&path, error = ?e, "Failed to canonicalize config path");
+            return ExitCode::Abnormal;
+        }
+    };
+
+    // Load the bootstrap configuration
     let _distro = match Brogstrappa::from_path(&path) {
         Ok(d) => d,
         Err(e) => {
             let report = miette::Report::new(e);
             error!(config = ?path, "Failed to load bootstrap configuration");
-            eprintln!("{report:?}");
+            suspend_tracing_indicatif(|| {
+                eprintln!("{report:?}");
+            });
             return ExitCode::Abnormal;
         }
     };
