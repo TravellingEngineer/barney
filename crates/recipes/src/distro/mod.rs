@@ -9,8 +9,8 @@ use kdl::{KdlDocument, KdlError};
 use miette::{Diagnostic, NamedSource};
 use thiserror::Error;
 
-mod profile;
-pub use profile::Profile;
+mod phase;
+pub use phase::Phase;
 pub mod syntax;
 
 /// A Brogstrappa definition is taken from a brogstrappa.kdl
@@ -18,7 +18,7 @@ pub mod syntax;
 ///
 #[derive(Debug)]
 pub struct Brogstrappa {
-    _profiles: Vec<Profile>,
+    _phases: Vec<Phase>,
 }
 
 #[derive(Diagnostic, Error, Debug)]
@@ -38,15 +38,15 @@ pub enum Error {
         source: KdlError,
     },
 
-    // Profile DSL
-    #[error("Profile parsing")]
+    // Phase DSL
+    #[error("Phase parsing")]
     #[diagnostic()]
-    Profile {
+    Phase {
         #[source_code]
         src: NamedSource<String>,
 
         #[diagnostic_source(transparent)]
-        source: profile::Error,
+        source: phase::Error,
     },
 
     // IDK
@@ -75,8 +75,8 @@ impl Brogstrappa {
         for node in doc.nodes() {
             match node.name().value() {
                 "module" => {}
-                "profile" => {
-                    let node = Profile::from_node(node).map_err(|e| Error::Profile {
+                "phase" => {
+                    let node = Phase::from_node(node).map_err(|e| Error::Phase {
                         src: source.clone(),
                         source: e,
                     })?;
