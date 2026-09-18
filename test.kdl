@@ -20,109 +20,109 @@ phase crosstools {
 }
 
 
-// environment exports
-// accessed using Rust qualifiers such as env::target, etc
-// typed as (var)
-// this is to help define the custody chain for the hashing algorithm.
+// // environment exports
+// // accessed using Rust qualifiers such as env::target, etc
+// // typed as (var)
+// // this is to help define the custody chain for the hashing algorithm.
 
-module env {
-  variables {
-    // (var)env::target
-    target (var)phase::target
-    prefix (var)phase::prefix
-  }
+// module env {
+//   variables {
+//     // (var)env::target
+//     target (var)phase::target
+//     prefix (var)phase::prefix
+//   }
 
-  // exported into the shell environment
-  exports {
-    // exported as ENV_PREFIX
-    PREFIX (var)prefix
-    TARGET (var)target
-  }
-}
+//   // exported into the shell environment
+//   exports {
+//     // exported as ENV_PREFIX
+//     PREFIX (var)prefix
+//     TARGET (var)target
+//   }
+// }
 
-module autotools {
-  // autotools::configure
-  action configure {
-    arguments {
-      (string) command "./configure"
-      (string) prefix {
-        default "/usr"
-      }
-      (list) enable {
-        default shared
-      }
-      (list) disable {
-        default static
-      }
-      (list) with
-      (list) without {
+// module autotools {
+//   // autotools::configure
+//   action configure {
+//     arguments {
+//       (string) command "./configure"
+//       (string) prefix {
+//         default "/usr"
+//       }
+//       (list) enable {
+//         default shared
+//       }
+//       (list) disable {
+//         default static
+//       }
+//       (list) with
+//       (list) without {
 
-      }
-      (string) target {
-        default (var)env::target
-      }
-    }
+//       }
+//       (string) target {
+//         default (var)env::target
+//       }
+//     }
 
-    // Begin writing a shell script
-    execute {
-      emit (arg)command "--prefix=" (arg)prefix
-      with enable {
-        emit " "
-        foreach arg enable {
-          emit "--enable-" (var)arg
-        }
-      }
-      with disable {
-        emit " "
-        foreach arg disable {
-          emit "--disable-" (var)arg
-        }
-      }
-      with target {
-        emit " --target=" (var)env::target
-      }
-      emit_newline
-    }
-  }
-}
+//     // Begin writing a shell script
+//     execute {
+//       emit (arg)command "--prefix=" (arg)prefix
+//       with enable {
+//         emit " "
+//         foreach arg enable {
+//           emit "--enable-" (var)arg
+//         }
+//       }
+//       with disable {
+//         emit " "
+//         foreach arg disable {
+//           emit "--disable-" (var)arg
+//         }
+//       }
+//       with target {
+//         emit " --target=" (var)env::target
+//       }
+//       emit_newline
+//     }
+//   }
+// }
 
-package llvm {
-  version "23.1.0"
-  homepage "https://llvm.org"
-  summary "LLVM"
-  description "LLVM"
-  license LGPL-2.1
-  license {
-    BLAH
-    chicken
-    LGPL-2.1
-  }
+// package llvm {
+//   version "23.1.0"
+//   homepage "https://llvm.org"
+//   summary "LLVM"
+//   description "LLVM"
+//   license LGPL-2.1
+//   license {
+//     BLAH
+//     chicken
+//     LGPL-2.1
+//   }
 
-  profile "stage0" {
-      build {
-          // invoke confgure from autotools
-          autotools::configure prefix="/usr"
-          autotools::configure {
-            prefix "/usr"
-            enable {
-              docs
-              chickens
-            }
-            disable dinosaurs cats
-          }
-          autotools::make parallel=#false
-          autotools::make_install
+//   profile "stage0" {
+//       build {
+//           // invoke confgure from autotools
+//           autotools::configure prefix="/usr"
+//           autotools::configure {
+//             prefix "/usr"
+//             enable {
+//               docs
+//               chickens
+//             }
+//             disable dinosaurs cats
+//           }
+//           autotools::make parallel=#false
+//           autotools::make_install
 
-          // raw shell invocation
-          shell #"""
-          echo "What's the story in balamorey"
-          hows it going bro
-          """#
-      }
-  }
+//           // raw shell invocation
+//           shell #"""
+//           echo "What's the story in balamorey"
+//           hows it going bro
+//           """#
+//       }
+//   }
 
-  subpackage docs {
-    summary "documentation"
-    description "Documentation for LLVM"
-  }
-}
+//   subpackage docs {
+//     summary "documentation"
+//     description "Documentation for LLVM"
+//   }
+// }
