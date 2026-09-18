@@ -8,6 +8,56 @@ use kdl::KdlNode;
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
 
+/// Node identifier rules
+#[derive(Debug)]
+pub enum NodeName {
+    /// A fixed identifier is required
+    Static(&'static str),
+
+    /// Arbitrary name for the node supported
+    Dynamic,
+}
+
+/// Control evaluation of nodes to enforce schema
+#[derive(Debug)]
+pub struct NodeSpec<'a> {
+    /// The matching name for the node, ie `NodeName::Static("variables")`
+    pub name: NodeName,
+
+    /// Supported argument kinds
+    pub args: ArgSpec,
+
+    /// When not empty, limit the allowed properties
+    pub props: &'a [PropSpec],
+
+    /// Children of the node, if permitted
+    pub children: &'a [NodeSpec<'a>],
+}
+
+/// Argument spec for blocks
+///
+/// Determines the policy for processing arguments to a node,
+/// for an ID based node this would be `ArgSpec::Exactly(1)`
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum ArgSpec {
+    /// Does not support any arguments
+    None,
+
+    /// Exact number of arguments
+    Exactly(usize),
+
+    /// Any number of arguments.
+    Variable,
+}
+
+/// Controls property evaluation (which are always built into maps)
+/// TODO: Add type filtering here for the value kind
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub struct PropSpec {
+    /// The expected name of the property
+    pub name: &'static str,
+}
+
 /// Some manner of syntax issue in our DSL atop KDL
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {

@@ -11,12 +11,18 @@ use thiserror::Error;
 
 mod phase;
 pub use phase::Phase;
+use tracing::info;
+
+use crate::syntax::NodeSpec;
 
 /// A distro definition is taken from a bootstrap.kdl
 ///
 pub struct BootstrapSpec {
     phases: Vec<Phase>,
 }
+
+// Our entire schema is a composite of loader rules by way of NodeSpec sets
+static RULES: &[&NodeSpec] = &[&phase::RULES];
 
 #[derive(Diagnostic, Error, Debug)]
 #[diagnostic()]
@@ -62,6 +68,9 @@ impl BootstrapSpec {
             src: source_code.clone(),
             source: e,
         })?;
+
+        info!(rules = ?RULES, "Rules loaded");
+
         BootstrapSpec::new(&source_code, &kdl_doc)
     }
 

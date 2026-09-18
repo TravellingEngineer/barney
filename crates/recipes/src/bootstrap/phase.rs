@@ -8,12 +8,36 @@ use miette::Diagnostic;
 use thiserror::Error;
 use tracing::trace;
 
-use crate::syntax;
+use crate::syntax::{self, ArgSpec, NodeName, NodeSpec};
 
 #[derive(Debug)]
 pub struct Phase {
     id: String,
 }
+
+/// rules for loading phase nodes
+pub(super) static RULES: NodeSpec<'static> = NodeSpec {
+    name: NodeName::Static("phase"),
+    // Single argument: ID
+    args: ArgSpec::Exactly(1),
+    // No properties permitted
+    props: &[],
+    // Only allow one child node: `variables`
+    children: &[NodeSpec {
+        name: NodeName::Static("variables"),
+        args: ArgSpec::None,
+        props: &[],
+        // Arbitrary children due to names
+        children: &[NodeSpec {
+            // User defined name
+            name: NodeName::Dynamic,
+            // Variables have one argument, the value
+            args: ArgSpec::Exactly(1),
+            props: &[],
+            children: &[],
+        }],
+    }],
+};
 
 #[derive(Debug, Error, Diagnostic)]
 pub enum Error {
