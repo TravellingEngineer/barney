@@ -25,20 +25,20 @@ phase crosstools {
 // // typed as (var)
 // // this is to help define the custody chain for the hashing algorithm.
 
-// module env {
-//   variables {
-//     // (var)env::target
-//     target (var)phase::target
-//     prefix (var)phase::prefix
-//   }
+module env {
+  variables {
+    // (var)env::target
+    target (var)phase::target
+    prefix (var)phase::prefix
+  }
 
-//   // exported into the shell environment
-//   exports {
-//     // exported as ENV_PREFIX
-//     PREFIX (var)prefix
-//     TARGET (var)target
-//   }
-// }
+  // exported into the shell environment
+  exports {
+    // exported as ENV_PREFIX
+    PREFIX (var)prefix
+    TARGET (var)target
+  }
+}
 
 // module autotools {
 //   // autotools::configure

@@ -11,6 +11,8 @@ use thiserror::Error;
 
 mod phase;
 pub use phase::Phase;
+mod module;
+pub use module::Module;
 
 use crate::syntax::{self, NodeSpec};
 
@@ -19,6 +21,7 @@ use crate::syntax::{self, NodeSpec};
 #[derive(Debug)]
 pub struct BootstrapSpec {
     phases: Vec<Phase>,
+    modules: Vec<Module>,
 }
 
 #[repr(usize)]
@@ -30,6 +33,21 @@ pub(crate) enum SpecIdentity {
     PhaseVariables,
     /// Some variable in the phase variables list
     PhaseVariable,
+
+    /// Module block
+    Module,
+
+    /// Module variables block
+    ModuleVariables,
+
+    /// Individual variable in module
+    ModuleVariable,
+
+    /// Module exports block
+    ModuleExports,
+
+    /// Individual export in a module
+    ModuleExport,
 }
 
 impl From<SpecIdentity> for usize {
@@ -39,7 +57,7 @@ impl From<SpecIdentity> for usize {
 }
 
 // Our entire schema is a composite of loader rules by way of NodeSpec sets
-static RULES: &[&NodeSpec<'static, SpecIdentity>] = &[&phase::RULES];
+static RULES: &[&NodeSpec<'static, SpecIdentity>] = &[&phase::RULES, &module::RULES];
 
 #[derive(Diagnostic, Error, Debug)]
 #[diagnostic()]
@@ -95,20 +113,27 @@ impl BootstrapSpec {
         })?;
 
         let mut phases = vec![];
+        let mut modules = vec![];
         for node in nodes.into_iter() {
             match node.identity {
                 SpecIdentity::Phase => {
                     phases.push(Phase::new(node));
                 }
+                SpecIdentity::Module => modules.push(Module::new(node)),
                 _ => panic!("unsupported descent"),
             }
         }
 
-        Ok(Self { phases })
+        Ok(Self { phases, modules })
     }
 
     /// Access the underlying phases
     pub fn phases(&self) -> &[Phase] {
         self.phases.as_slice()
+    }
+
+    /// Access the modules
+    pub fn modules(&self) -> &[Module] {
+        self.modules.as_slice()
     }
 }
