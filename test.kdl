@@ -20,10 +20,10 @@ phase crosstools {
 }
 
 
-// // environment exports
-// // accessed using Rust qualifiers such as env::target, etc
-// // typed as (var)
-// // this is to help define the custody chain for the hashing algorithm.
+// environment exports
+// accessed using Rust qualifiers such as env::target, etc
+// typed as (var)
+// this is to help define the custody chain for the hashing algorithm.
 
 module env {
   variables {
