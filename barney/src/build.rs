@@ -23,7 +23,7 @@ pub async fn run_command(path: &Path) -> ExitCode {
     };
 
     // Load the bootstrap configuration
-    let _distro = match BootstrapSpec::from_path(&path) {
+    let distro = match BootstrapSpec::from_path(&path) {
         Ok(d) => d,
         Err(e) => {
             let report = miette::Report::new(e);
@@ -34,6 +34,6 @@ pub async fn run_command(path: &Path) -> ExitCode {
             return ExitCode::Abnormal;
         }
     };
-    info!(config = ?path, "Loaded distro configuration");
+    info!(?distro, config = ?path, "Loaded distro configuration");
     ExitCode::Normal
 }

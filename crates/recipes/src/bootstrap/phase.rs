@@ -3,14 +3,17 @@
 
 //! Bootstrap phase
 
+use std::collections::HashMap;
+
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeName, NodeSpec},
+    syntax::{ArgSpec, NodeName, NodeSpec, ProcessedNode},
 };
 
 #[derive(Debug)]
 pub struct Phase {
-    pub id: String,
+    id: String,
+    _vars: HashMap<String, String>,
 }
 
 /// rules for loading phase nodes
@@ -45,5 +48,28 @@ impl Phase {
     /// Returns the phase ID
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    /// Consume a processed node to generate a phase
+    pub(crate) fn new(node: ProcessedNode<SpecIdentity>) -> Self {
+        // > phase > variables > key = value
+        let vars = if let Some(block) = node
+            .children
+            .into_iter()
+            .find(|i| i.identity == SpecIdentity::PhaseVariables)
+        {
+            block
+                .children
+                .into_iter()
+                .filter(|f| f.identity == SpecIdentity::PhaseVariable)
+                .map(|f| (f.name, f.args.into_iter().next().unwrap()))
+                .collect()
+        } else {
+            HashMap::new()
+        };
+        Self {
+            id: node.args.into_iter().next().unwrap(),
+            _vars: vars,
+        }
     }
 }

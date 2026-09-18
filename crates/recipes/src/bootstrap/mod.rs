@@ -16,6 +16,7 @@ use crate::syntax::{self, NodeSpec};
 
 /// A distro definition is taken from a bootstrap.kdl
 ///
+#[derive(Debug)]
 pub struct BootstrapSpec {
     phases: Vec<Phase>,
 }
@@ -94,13 +95,10 @@ impl BootstrapSpec {
         })?;
 
         let mut phases = vec![];
-        for node in nodes.iter() {
+        for node in nodes.into_iter() {
             match node.identity {
                 SpecIdentity::Phase => {
-                    let phase = Phase {
-                        id: node.args.first().cloned().unwrap(),
-                    };
-                    phases.push(phase);
+                    phases.push(Phase::new(node));
                 }
                 _ => panic!("unsupported descent"),
             }
