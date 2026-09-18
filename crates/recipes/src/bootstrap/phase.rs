@@ -28,6 +28,14 @@ impl Phase {
         let name = syntax::get_node_id(node)?;
         trace!(name = name, "parsing bootstrap phase");
 
+        // ensure we have valid children only
+        for child in node.iter_children() {
+            match child.name().value() {
+                "variables" => {}
+                _ => return Err(syntax::Error::UnexpectedIdentifier { span: child.span() })?,
+            }
+        }
+
         Ok(Self { id: name })
     }
 

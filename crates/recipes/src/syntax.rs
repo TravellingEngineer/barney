@@ -32,6 +32,12 @@ pub enum Error {
         expected: usize,
         found: usize,
     },
+
+    #[error("unexpected identifier")]
+    UnexpectedIdentifier {
+        #[label("Encountered an unexpected identifier or keyword")]
+        span: SourceSpan,
+    },
 }
 
 /// Return a string ID or an error
