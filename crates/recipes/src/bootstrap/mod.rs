@@ -13,7 +13,7 @@ mod phase;
 pub use phase::Phase;
 use tracing::info;
 
-use crate::syntax::NodeSpec;
+use crate::syntax::{self, NodeSpec};
 
 /// A distro definition is taken from a bootstrap.kdl
 ///
@@ -39,7 +39,7 @@ impl From<SpecIdentity> for usize {
 }
 
 // Our entire schema is a composite of loader rules by way of NodeSpec sets
-static RULES: &[&NodeSpec<SpecIdentity>] = &[&phase::RULES];
+static RULES: &[&NodeSpec<'static, SpecIdentity>] = &[&phase::RULES];
 
 #[derive(Diagnostic, Error, Debug)]
 #[diagnostic()]
@@ -58,15 +58,14 @@ pub enum Error {
         source: KdlError,
     },
 
-    // Phase DSL
-    #[error("Phase parsing")]
+    #[error("Syntax parsing")]
     #[diagnostic()]
-    Phase {
+    Syntax {
         #[source_code]
         src: NamedSource<String>,
 
         #[diagnostic_source(transparent)]
-        source: phase::Error,
+        source: syntax::Error,
     },
 
     // IDK
@@ -75,6 +74,7 @@ pub enum Error {
 }
 
 impl BootstrapSpec {
+    /// Load a bootstrap spec from the given path
     pub fn from_path(whence: &impl AsRef<Path>) -> Result<Self, Error> {
         let whence_path = whence.as_ref().to_string_lossy().to_string();
         let contents = fs::read_to_string(&whence_path)?;
@@ -94,22 +94,13 @@ impl BootstrapSpec {
     /// Load a bootstrap definition (into AST) from a valid KDL document
     /// using the correct procedural lingo.
     pub fn new(source: &NamedSource<String>, doc: &KdlDocument) -> Result<Self, Error> {
-        let mut phases = vec![];
-        for node in doc.nodes() {
-            match node.name().value() {
-                "module" => {}
-                "phase" => {
-                    let node = Phase::from_node(node).map_err(|e| Error::Phase {
-                        src: source.clone(),
-                        source: e,
-                    })?;
-                    phases.push(node);
-                }
-                _ => {}
-            }
-        }
+        // TODO: Pivot to process_kdl API
+        syntax::process_kdl(doc, RULES).map_err(|e| Error::Syntax {
+            src: source.clone(),
+            source: e,
+        })?;
 
-        Ok(Self { phases })
+        Err(Error::Unimplemented)
     }
 
     /// Access the underlying phases

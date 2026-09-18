@@ -3,10 +3,9 @@
 
 //! Syntax helpers / errors
 
-use std::hash::Hash;
+use std::{fmt::Debug, hash::Hash};
 
-use itertools::Itertools;
-use kdl::KdlNode;
+use kdl::KdlDocument;
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
 
@@ -24,7 +23,7 @@ pub enum NodeName {
 #[derive(Debug)]
 pub struct NodeSpec<'a, I>
 where
-    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash,
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug,
 {
     /// The matching name for the node, ie `NodeName::Static("variables")`
     pub name: NodeName,
@@ -98,28 +97,13 @@ pub enum Error {
     },
 }
 
-/// Return a string ID or an error
-pub(super) fn get_node_id(node: &KdlNode) -> Result<String, Error> {
-    let attr = node
-        .entries()
-        .iter()
-        .exactly_one()
-        .map_err(|e| Error::WrongArgumentCount {
-            span: node.span(),
-            expected: 1,
-            found: e.count(),
-        })?;
-
-    // make sure its not a property.
-    if attr.name().is_some() {
-        return Err(Error::UnexpectedProperty { span: attr.span() });
-    }
-
-    // make sure its stringy.
-    let id = attr
-        .value()
-        .as_string()
-        .ok_or_else(|| Error::ExpectedID { span: attr.span() })?;
-
-    Ok(id.into())
+/// Process KDL according to the given rule set
+pub(super) fn process_kdl<'a, I>(
+    _document: &KdlDocument,
+    _rules: &[&NodeSpec<'a, I>],
+) -> Result<(), Error>
+where
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug,
+{
+    unimplemented!("Whoops!")
 }

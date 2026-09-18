@@ -3,14 +3,9 @@
 
 //! Bootstrap phase
 
-use kdl::KdlNode;
-use miette::Diagnostic;
-use thiserror::Error;
-use tracing::trace;
-
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{self, ArgSpec, NodeName, NodeSpec},
+    syntax::{ArgSpec, NodeName, NodeSpec},
 };
 
 #[derive(Debug)]
@@ -46,30 +41,7 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
     }],
 };
 
-#[derive(Debug, Error, Diagnostic)]
-pub enum Error {
-    #[error(transparent)]
-    #[diagnostic(transparent)]
-    Syntax(#[from] syntax::Error),
-}
-
 impl Phase {
-    /// Build a distro::Phase from a KdlNode
-    pub(super) fn from_node(node: &KdlNode) -> Result<Self, Error> {
-        let name = syntax::get_node_id(node)?;
-        trace!(name = name, "parsing bootstrap phase");
-
-        // ensure we have valid children only
-        for child in node.iter_children() {
-            match child.name().value() {
-                "variables" => {}
-                _ => return Err(syntax::Error::UnexpectedIdentifier { span: child.span() })?,
-            }
-        }
-
-        Ok(Self { id: name })
-    }
-
     /// Returns the phase ID
     pub fn id(&self) -> &str {
         &self.id
