@@ -21,8 +21,25 @@ pub struct BootstrapSpec {
     phases: Vec<Phase>,
 }
 
+#[repr(usize)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub(crate) enum SpecIdentity {
+    /// Root phase
+    Phase,
+    /// The `variables` block itself
+    PhaseVariables,
+    /// Some variable in the phase variables list
+    PhaseVariable,
+}
+
+impl From<SpecIdentity> for usize {
+    fn from(value: SpecIdentity) -> Self {
+        value as usize
+    }
+}
+
 // Our entire schema is a composite of loader rules by way of NodeSpec sets
-static RULES: &[&NodeSpec] = &[&phase::RULES];
+static RULES: &[&NodeSpec<SpecIdentity>] = &[&phase::RULES];
 
 #[derive(Diagnostic, Error, Debug)]
 #[diagnostic()]

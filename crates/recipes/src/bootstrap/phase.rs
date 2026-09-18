@@ -8,7 +8,10 @@ use miette::Diagnostic;
 use thiserror::Error;
 use tracing::trace;
 
-use crate::syntax::{self, ArgSpec, NodeName, NodeSpec};
+use crate::{
+    bootstrap::SpecIdentity,
+    syntax::{self, ArgSpec, NodeName, NodeSpec},
+};
 
 #[derive(Debug)]
 pub struct Phase {
@@ -16,8 +19,10 @@ pub struct Phase {
 }
 
 /// rules for loading phase nodes
-pub(super) static RULES: NodeSpec<'static> = NodeSpec {
+pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
     name: NodeName::Static("phase"),
+    identity: SpecIdentity::Phase,
+
     // Single argument: ID
     args: ArgSpec::Exactly(1),
     // No properties permitted
@@ -25,12 +30,14 @@ pub(super) static RULES: NodeSpec<'static> = NodeSpec {
     // Only allow one child node: `variables`
     children: &[NodeSpec {
         name: NodeName::Static("variables"),
+        identity: SpecIdentity::PhaseVariables,
         args: ArgSpec::None,
         props: &[],
         // Arbitrary children due to names
         children: &[NodeSpec {
             // User defined name
             name: NodeName::Dynamic,
+            identity: SpecIdentity::PhaseVariable,
             // Variables have one argument, the value
             args: ArgSpec::Exactly(1),
             props: &[],

@@ -3,6 +3,8 @@
 
 //! Syntax helpers / errors
 
+use std::hash::Hash;
+
 use itertools::Itertools;
 use kdl::KdlNode;
 use miette::{Diagnostic, SourceSpan};
@@ -20,9 +22,15 @@ pub enum NodeName {
 
 /// Control evaluation of nodes to enforce schema
 #[derive(Debug)]
-pub struct NodeSpec<'a> {
+pub struct NodeSpec<'a, I>
+where
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash,
+{
     /// The matching name for the node, ie `NodeName::Static("variables")`
     pub name: NodeName,
+
+    /// Identity for the node to retain context in processing
+    pub identity: I,
 
     /// Supported argument kinds
     pub args: ArgSpec,
@@ -31,7 +39,7 @@ pub struct NodeSpec<'a> {
     pub props: &'a [PropSpec],
 
     /// Children of the node, if permitted
-    pub children: &'a [NodeSpec<'a>],
+    pub children: &'a [NodeSpec<'a, I>],
 }
 
 /// Argument spec for blocks
