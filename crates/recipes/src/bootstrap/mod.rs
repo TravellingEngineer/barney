@@ -11,7 +11,6 @@ use thiserror::Error;
 
 mod phase;
 pub use phase::Phase;
-use tracing::info;
 
 use crate::syntax::{self, NodeSpec};
 
@@ -22,7 +21,7 @@ pub struct BootstrapSpec {
 }
 
 #[repr(usize)]
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
 pub(crate) enum SpecIdentity {
     /// Root phase
     Phase,
@@ -67,10 +66,6 @@ pub enum Error {
         #[diagnostic_source(transparent)]
         source: syntax::Error,
     },
-
-    // IDK
-    #[error("unimplemented")]
-    Unimplemented,
 }
 
 impl BootstrapSpec {
@@ -86,8 +81,6 @@ impl BootstrapSpec {
             source: e,
         })?;
 
-        info!(rules = ?RULES, "Rules loaded");
-
         BootstrapSpec::new(&source_code, &kdl_doc)
     }
 
@@ -95,12 +88,25 @@ impl BootstrapSpec {
     /// using the correct procedural lingo.
     pub fn new(source: &NamedSource<String>, doc: &KdlDocument) -> Result<Self, Error> {
         // TODO: Pivot to process_kdl API
-        syntax::process_kdl(doc, RULES).map_err(|e| Error::Syntax {
+        let nodes = syntax::process_kdl(doc, RULES).map_err(|e| Error::Syntax {
             src: source.clone(),
             source: e,
         })?;
 
-        Err(Error::Unimplemented)
+        let mut phases = vec![];
+        for node in nodes.iter() {
+            match node.identity {
+                SpecIdentity::Phase => {
+                    let phase = Phase {
+                        id: node.args.first().cloned().unwrap(),
+                    };
+                    phases.push(phase);
+                }
+                _ => panic!("unsupported descent"),
+            }
+        }
+
+        Ok(Self { phases })
     }
 
     /// Access the underlying phases

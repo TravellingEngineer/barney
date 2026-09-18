@@ -10,7 +10,7 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Phase {
-    id: String,
+    pub id: String,
 }
 
 /// rules for loading phase nodes

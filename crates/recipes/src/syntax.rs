@@ -3,13 +3,26 @@
 
 //! Syntax helpers / errors
 
-use std::{collections::HashMap, fmt::Debug, hash::Hash};
+use std::{collections::HashMap, fmt::Debug, hash::Hash, vec};
 
 use itertools::{Either, Itertools};
 use kdl::{KdlDocument, KdlNode};
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
-use tracing::info;
+
+/// A "Baked" node when processed via AST
+#[derive(Debug)]
+pub struct ProcessedNode<I>
+where
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
+{
+    pub identity: I,
+    pub name: String,
+    // TODO: Use type system with tagging + variable references
+    pub args: Vec<String>,
+    pub props: HashMap<String, String>,
+    pub children: Vec<ProcessedNode<I>>,
+}
 
 /// Node identifier rules
 #[derive(Debug)]
@@ -25,7 +38,7 @@ pub enum NodeName {
 #[derive(Debug)]
 pub struct NodeSpec<'a, I>
 where
-    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug,
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
 {
     /// The matching name for the node, ie `NodeName::Static("variables")`
     pub name: NodeName,
@@ -113,19 +126,20 @@ pub enum Error {
 pub(super) fn process_kdl<'a, I>(
     document: &KdlDocument,
     rules: &[&NodeSpec<'a, I>],
-) -> Result<(), Error>
+) -> Result<Vec<ProcessedNode<I>>, Error>
 where
-    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug,
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
 {
     let mut ruleset = rules.iter().cloned().collect_vec();
+    let mut results = vec![];
 
     // Toplevel descent + entry
     for node in document.nodes() {
         // Recurse children not siblings
-        process_kdl_node(node, &mut ruleset)?;
+        results.push(process_kdl_node(node, &mut ruleset)?);
     }
 
-    unimplemented!()
+    Ok(results)
 }
 
 /// Process a single KDL node according to rules and if successful, return built
@@ -134,9 +148,9 @@ where
 fn process_kdl_node<'a, 'b, I>(
     node: &KdlNode,
     rules: &'b mut Vec<&NodeSpec<'a, I>>,
-) -> Result<(), Error>
+) -> Result<ProcessedNode<I>, Error>
 where
-    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug,
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
 {
     let mut rule_index = None;
     for (index, rule) in rules.iter().enumerate() {
@@ -162,8 +176,6 @@ where
         id: node.name().to_string(),
     })?;
     let rule = rules.get(idx).unwrap();
-
-    info!(node_name = node.name().value(), rule = ?rule, rule_index = ?rule_index, "Matching rule?");
 
     // bake a property map and argument set
     let (properties, args): (HashMap<String, _>, Vec<_>) =
@@ -202,8 +214,9 @@ where
 
     // check property sanity
     // TODO: Permit dynamic property matching like for arguments
+    // TODO: Handle duplicate rules
     for (id, prop) in properties.iter() {
-        let (match_idx, spec) = rule
+        let _ = rule
             .props
             .iter()
             .find_position(|r| r.name == id)
@@ -211,14 +224,26 @@ where
                 span: prop.span(),
                 name: id.clone(),
             })?;
-        info!(prop_idx = match_idx, ?spec, "Matched a property");
     }
+
+    let mut children = vec![];
 
     // Recurse the child with subset of expendable rules
     let mut child_rules = rule.children.iter().collect_vec();
     for child in node.iter_children() {
-        process_kdl_node(child, &mut child_rules)?;
+        children.push(process_kdl_node(child, &mut child_rules)?);
     }
 
-    Ok(())
+    // Full baked node
+
+    Ok(ProcessedNode {
+        identity: rule.identity.clone(),
+        name: node.name().to_string(),
+        args: args.into_iter().map(|a| a.value().to_string()).collect(),
+        props: properties
+            .into_iter()
+            .map(|(k, v)| (k, v.value().to_string()))
+            .collect(),
+        children,
+    })
 }
