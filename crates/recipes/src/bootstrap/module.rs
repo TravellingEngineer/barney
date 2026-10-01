@@ -5,6 +5,8 @@
 
 use std::collections::HashMap;
 
+use itertools::Itertools;
+
 use crate::{
     bootstrap::SpecIdentity,
     syntax::{ArgSpec, NodeName, NodeSpec, ProcessedNode},
@@ -94,5 +96,15 @@ impl Module {
     /// Return the module ID
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    /// Return all export keys
+    pub fn exports(&self) -> Vec<String> {
+        self.exports.keys().cloned().collect_vec()
+    }
+
+    /// Return all variable keys
+    pub fn vars(&self) -> Vec<String> {
+        self.vars.keys().cloned().collect_vec()
     }
 }

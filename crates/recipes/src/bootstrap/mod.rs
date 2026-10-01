@@ -106,7 +106,6 @@ impl BootstrapSpec {
     /// Load a bootstrap definition (into AST) from a valid KDL document
     /// using the correct procedural lingo.
     pub fn new(source: &NamedSource<String>, doc: &KdlDocument) -> Result<Self, Error> {
-        // TODO: Pivot to process_kdl API
         let nodes = syntax::process_kdl(doc, RULES).map_err(|e| Error::Syntax {
             src: source.clone(),
             source: e,
