@@ -7,7 +7,7 @@ use std::collections::HashMap;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeName, NodeSpec, ProcessedNode},
+    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode},
 };
 
 #[derive(Debug)]
@@ -40,8 +40,11 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
             args: ArgSpec::Exactly(1),
             props: &[],
             children: &[],
+            descent: NodeDescent::Normal,
         }],
+        descent: NodeDescent::Normal,
     }],
+    descent: NodeDescent::Normal,
 };
 
 impl Phase {

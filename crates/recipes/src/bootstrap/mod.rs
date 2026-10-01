@@ -48,6 +48,12 @@ pub(crate) enum SpecIdentity {
 
     /// Individual export in a module
     ModuleExport,
+
+    /// An action within a moduke
+    ModuleAction,
+
+    /// Executor definition
+    ModuleActionExecute,
 }
 
 impl From<SpecIdentity> for usize {

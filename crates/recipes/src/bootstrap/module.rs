@@ -6,10 +6,11 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
+use tracing::info;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeName, NodeSpec, ProcessedNode},
+    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode},
 };
 
 /// A module within the bootstrap configuration
@@ -42,7 +43,9 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
                 args: ArgSpec::Exactly(1),
                 props: &[],
                 children: &[],
+                descent: NodeDescent::Normal,
             }],
+            descent: NodeDescent::Normal,
         },
         // exports
         NodeSpec {
@@ -56,9 +59,27 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
                 args: ArgSpec::Exactly(1),
                 props: &[],
                 children: &[],
+                descent: NodeDescent::Normal,
             }],
+            descent: NodeDescent::Normal,
+        },
+        NodeSpec {
+            name: NodeName::Static("action"),
+            identity: SpecIdentity::ModuleAction,
+            args: ArgSpec::Exactly(1),
+            props: &[],
+            children: &[NodeSpec {
+                name: NodeName::Static("execute"),
+                identity: SpecIdentity::ModuleActionExecute,
+                args: ArgSpec::None,
+                props: &[],
+                children: &[],
+                descent: NodeDescent::Never,
+            }],
+            descent: NodeDescent::Normal,
         },
     ],
+    descent: NodeDescent::Normal,
 };
 
 impl Module {
@@ -86,6 +107,9 @@ impl Module {
                     .for_each(|(k, v)| {
                         exports.insert(k, v);
                     }),
+                SpecIdentity::ModuleAction => {
+                    info!("Got an action: {:?}", child.args.first())
+                }
                 _ => panic!("derp"),
             }
         }

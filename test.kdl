@@ -40,51 +40,51 @@ module env {
   }
 }
 
-// module autotools {
-//   // autotools::configure
-//   action configure {
-//     arguments {
-//       (string) command "./configure"
-//       (string) prefix {
-//         default "/usr"
-//       }
-//       (list) enable {
-//         default shared
-//       }
-//       (list) disable {
-//         default static
-//       }
-//       (list) with
-//       (list) without {
+module autotools {
+  // autotools::configure
+  action configure {
+    // arguments {
+    //   (string) command "./configure"
+    //   (string) prefix {
+    //     default "/usr"
+    //   }
+    //   (list) enable {
+    //     default shared
+    //   }
+    //   (list) disable {
+    //     default static
+    //   }
+    //   (list) with
+    //   (list) without {
 
-//       }
-//       (string) target {
-//         default (var)env::target
-//       }
-//     }
+    //   }
+    //   (string) target {
+    //     default (var)env::target
+    //   }
+    // }
 
-//     // Begin writing a shell script
-//     execute {
-//       emit (arg)command "--prefix=" (arg)prefix
-//       with enable {
-//         emit " "
-//         foreach arg enable {
-//           emit "--enable-" (var)arg
-//         }
-//       }
-//       with disable {
-//         emit " "
-//         foreach arg disable {
-//           emit "--disable-" (var)arg
-//         }
-//       }
-//       with target {
-//         emit " --target=" (var)env::target
-//       }
-//       emit_newline
-//     }
-//   }
-// }
+    // Begin writing a shell script
+    execute {
+      emit (arg)command "--prefix=" (arg)prefix
+      with enable {
+        emit " "
+        foreach arg enable {
+          emit "--enable-" (var)arg
+        }
+      }
+      with disable {
+        emit " "
+        foreach arg disable {
+          emit "--disable-" (var)arg
+        }
+      }
+      with target {
+        emit " --target=" (var)env::target
+      }
+      emit_newline
+    }
+  }
+}
 
 // package llvm {
 //   version "23.1.0"

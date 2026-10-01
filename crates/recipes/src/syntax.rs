@@ -47,6 +47,16 @@ pub enum NodeName {
     Dynamic,
 }
 
+/// Schema splitting for dynamic vs fixed behaviours
+#[derive(Debug)]
+pub enum NodeDescent {
+    /// Descend into all child nodes by static schema
+    Normal,
+
+    /// Do not descend into node tree, processing is at block level only
+    Never,
+}
+
 /// Control evaluation of nodes to enforce schema
 #[derive(Debug)]
 pub struct NodeSpec<'a, I>
@@ -67,6 +77,9 @@ where
 
     /// Children of the node, if permitted
     pub children: &'a [NodeSpec<'a, I>],
+
+    /// Descent behaviour
+    pub descent: NodeDescent,
 }
 
 /// Argument spec for blocks
@@ -243,9 +256,15 @@ where
 
     // Recurse the child with subset of expendable rules
     let mut child_rules = rule.children.iter().collect_vec();
-    for child in node.iter_children() {
-        children.push(process_kdl_node(child, &mut child_rules)?);
-    }
+    match rule.descent {
+        NodeDescent::Normal => {
+            // Process child per rules
+            for child in node.iter_children() {
+                children.push(process_kdl_node(child, &mut child_rules)?);
+            }
+        }
+        NodeDescent::Never => {}
+    };
 
     // Full baked node
 
