@@ -62,7 +62,7 @@ impl Phase {
                 .children
                 .into_iter()
                 .filter(|f| f.identity == SpecIdentity::PhaseVariable)
-                .map(|f| (f.name, f.args.into_iter().next().unwrap()))
+                .map(|f| (f.name().to_owned(), f.args.into_iter().next().unwrap()))
                 .collect()
         } else {
             HashMap::new()

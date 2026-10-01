@@ -74,7 +74,7 @@ impl Module {
                     .children
                     .into_iter()
                     .filter(|c| c.identity == SpecIdentity::ModuleVariable)
-                    .map(|n| (n.name, n.args.into_iter().next().unwrap()))
+                    .map(|n| (n.name().to_owned(), n.args.into_iter().next().unwrap()))
                     .for_each(|(k, v)| {
                         vars.insert(k, v);
                     }),
@@ -82,7 +82,7 @@ impl Module {
                     .children
                     .into_iter()
                     .filter(|c| c.identity == SpecIdentity::ModuleExport)
-                    .map(|n| (n.name, n.args.into_iter().next().unwrap()))
+                    .map(|n| (n.name().to_owned(), n.args.into_iter().next().unwrap()))
                     .for_each(|(k, v)| {
                         exports.insert(k, v);
                     }),

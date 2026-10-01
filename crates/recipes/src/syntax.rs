@@ -12,16 +12,29 @@ use thiserror::Error;
 
 /// A "Baked" node when processed via AST
 #[derive(Debug)]
-pub struct ProcessedNode<I>
+pub struct ProcessedNode<'a, I>
 where
     I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
 {
     pub identity: I,
-    pub name: String,
     // TODO: Use type system with tagging + variable references
     pub args: Vec<String>,
     pub props: HashMap<String, String>,
-    pub children: Vec<ProcessedNode<I>>,
+
+    pub children: Vec<ProcessedNode<'a, I>>,
+
+    /// Underlying KDL node
+    pub node: &'a KdlNode,
+}
+
+impl<'a, I> ProcessedNode<'a, I>
+where
+    I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
+{
+    // Zero-copy name accessor
+    pub fn name(&self) -> &str {
+        self.node.name().value()
+    }
 }
 
 /// Node identifier rules
@@ -124,9 +137,9 @@ pub enum Error {
 
 /// Process KDL according to the given rule set
 pub(super) fn process_kdl<'a, I>(
-    document: &KdlDocument,
+    document: &'a KdlDocument,
     rules: &[&NodeSpec<'a, I>],
-) -> Result<Vec<ProcessedNode<I>>, Error>
+) -> Result<Vec<ProcessedNode<'a, I>>, Error>
 where
     I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
 {
@@ -145,10 +158,10 @@ where
 /// Process a single KDL node according to rules and if successful, return built
 /// nodes according to our DSL requirements
 /// If a rule is "spent" in the current context, remove it from the input rules
-fn process_kdl_node<'a, 'b, I>(
-    node: &KdlNode,
-    rules: &'b mut Vec<&NodeSpec<'a, I>>,
-) -> Result<ProcessedNode<I>, Error>
+fn process_kdl_node<'a, I>(
+    node: &'a KdlNode,
+    rules: &mut Vec<&NodeSpec<'a, I>>,
+) -> Result<ProcessedNode<'a, I>, Error>
 where
     I: Into<usize> + Eq + PartialEq + PartialOrd + Hash + Debug + Clone,
 {
@@ -238,12 +251,12 @@ where
 
     Ok(ProcessedNode {
         identity: rule.identity.clone(),
-        name: node.name().to_string(),
         args: args.into_iter().map(|a| a.value().to_string()).collect(),
         props: properties
             .into_iter()
             .map(|(k, v)| (k, v.value().to_string()))
             .collect(),
         children,
+        node,
     })
 }
