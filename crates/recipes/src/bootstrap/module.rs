@@ -10,7 +10,7 @@ use tracing::{info, trace};
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, Statement, TaggedValue},
+    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, Script, TaggedValue},
 };
 
 /// A module within the bootstrap configuration
@@ -123,8 +123,8 @@ impl Module {
                     for child in child.children {
                         if child.identity == SpecIdentity::ModuleActionExecute {
                             trace!("Processing execution script");
-                            let statements = Statement::from_kdl_node(child.node).unwrap();
-                            trace!("Statements = {statements:#?}")
+                            let script = Script::from_kdl_node(child.node).unwrap();
+                            trace!("Script = {script:#?}")
                         }
                     }
                 }

@@ -55,8 +55,9 @@ pub enum Statement {
 /// A script contains one or more statements,
 /// any comment AST processing happened in fancy
 /// DSL atop KDL land.
+#[derive(Debug)]
 pub struct Script {
-    _statements: Vec<Statement>,
+    statements: Vec<Statement>,
 }
 
 /// Parsing flow for statements
@@ -117,7 +118,7 @@ static RULES: NodeSpec<'static, StatementID> = NodeSpec {
 
 impl<'a> Statement {
     /// Generate a Statement from a given node
-    pub fn from_kdl_node(node: &'a KdlNode) -> Result<Vec<Statement>, super::Error> {
+    fn from_kdl_node(node: &'a KdlNode) -> Result<Vec<Statement>, super::Error> {
         let mut rules = vec![&RULES];
         let node = process_kdl_node(node, &mut rules)?;
         assert_eq!(node.identity, StatementID::Root);
@@ -156,5 +157,17 @@ impl<'a> Statement {
             }
         }
         Ok(statements)
+    }
+}
+
+impl<'a> Script {
+    pub fn from_kdl_node(node: &'a KdlNode) -> Result<Self, super::Error> {
+        let statements = Statement::from_kdl_node(node)?;
+        Ok(Self { statements })
+    }
+
+    /// Returns all of the statements
+    pub fn statements(&self) -> &[Statement] {
+        self.statements.as_slice()
     }
 }
