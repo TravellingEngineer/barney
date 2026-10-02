@@ -7,13 +7,14 @@ use std::collections::HashMap;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode},
+    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, TaggedValue},
 };
 
 #[derive(Debug)]
 pub struct Phase {
     id: String,
-    _vars: HashMap<String, String>,
+    // TODO: Disallow any tags but var/arg
+    _vars: HashMap<String, TaggedValue>,
 }
 
 /// rules for loading phase nodes
@@ -71,7 +72,7 @@ impl Phase {
             HashMap::new()
         };
         Self {
-            id: node.args.into_iter().next().unwrap(),
+            id: node.args.into_iter().next().unwrap().to_string(),
             _vars: vars,
         }
     }

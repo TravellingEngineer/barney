@@ -7,6 +7,7 @@
 
 use std::{fmt::Display, str::FromStr};
 
+use kdl::KdlEntry;
 use thiserror::Error;
 
 /// Arguments and indeed properties may be decorated with
@@ -78,4 +79,40 @@ pub enum TaggedValue {
     Argument(String),
     Variable(String),
     Content(String),
+}
+
+impl<'a> TaggedValue {
+    /// Process a KDL entry and use the type annotation to generated
+    /// a correctly tagged value (argument/variable/content)
+    pub fn process_kdl_entry(entry: &'a KdlEntry) -> Result<TaggedValue, super::Error> {
+        let tag = if let Some(id) = entry.ty() {
+            id.value()
+                .parse::<Tag>()
+                .map_err(|_| super::Error::InvalidTag {
+                    span: id.span(),
+                    tag: id.value().to_string(),
+                })?
+        } else {
+            Tag::Type(Type::String)
+        };
+
+        let result = match tag {
+            Tag::Argument => TaggedValue::Argument(entry.value().to_string()),
+            Tag::Variable => TaggedValue::Variable(entry.value().to_string()),
+            Tag::Type(_) => TaggedValue::Content(entry.value().to_string()),
+        };
+
+        Ok(result)
+    }
+}
+
+impl Display for TaggedValue {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s = match self {
+            TaggedValue::Argument(arg) => arg,
+            TaggedValue::Variable(var) => var,
+            TaggedValue::Content(c) => c,
+        };
+        f.write_str(s)
+    }
 }

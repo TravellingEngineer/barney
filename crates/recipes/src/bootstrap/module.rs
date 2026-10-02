@@ -10,7 +10,7 @@ use tracing::info;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode},
+    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, TaggedValue},
 };
 
 /// A module within the bootstrap configuration
@@ -20,8 +20,9 @@ use crate::{
 #[derive(Debug)]
 pub struct Module {
     id: String,
-    vars: HashMap<String, String>,
-    exports: HashMap<String, String>,
+    // TODO: Disallow any tags but var/arg
+    vars: HashMap<String, TaggedValue>,
+    exports: HashMap<String, TaggedValue>,
 }
 
 /// Rules for the module nodespec
@@ -124,7 +125,11 @@ impl Module {
             }
         }
 
-        Self { id, exports, vars }
+        Self {
+            id: id.to_string(),
+            exports,
+            vars,
+        }
     }
 
     /// Return the module ID

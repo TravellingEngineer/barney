@@ -27,7 +27,7 @@ where
 {
     pub identity: I,
     // TODO: Use type system with tagging + variable references
-    pub args: Vec<String>,
+    pub args: Vec<TaggedValue>,
     pub props: HashMap<String, String>,
 
     pub children: Vec<ProcessedNode<'a, I>>,
@@ -85,5 +85,12 @@ pub enum Error {
         span: SourceSpan,
 
         id: String,
+    },
+
+    #[error("unkknown tag")]
+    InvalidTag {
+        #[label("Encountered an invalid annotation tag: {tag}")]
+        span: SourceSpan,
+        tag: String,
     },
 }

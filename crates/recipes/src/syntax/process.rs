@@ -7,7 +7,7 @@ use itertools::{Either, Itertools};
 use kdl::{KdlDocument, KdlNode};
 use std::{collections::HashMap, fmt::Debug, hash::Hash};
 
-use crate::syntax::{ArgSpec, Error, NodeDescent, NodeName, NodeSpec, ProcessedNode};
+use crate::syntax::{ArgSpec, Error, NodeDescent, NodeName, NodeSpec, ProcessedNode, TaggedValue};
 
 /// Process KDL according to the given rule set
 pub fn process_kdl<'a, I>(
@@ -129,9 +129,16 @@ where
 
     // Full baked node
 
+    // Process arguments into typed values
+    let mut processed_args = vec![];
+    for arg in args.into_iter() {
+        let proc = TaggedValue::process_kdl_entry(arg)?;
+        processed_args.push(proc);
+    }
+
     Ok(ProcessedNode {
         identity: rule.identity.clone(),
-        args: args.into_iter().map(|a| a.value().to_string()).collect(),
+        args: processed_args,
         props: properties
             .into_iter()
             .map(|(k, v)| (k, v.value().to_string()))
