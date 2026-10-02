@@ -87,7 +87,7 @@ pub enum Error {
         id: String,
     },
 
-    #[error("unkknown tag")]
+    #[error("unknown tag")]
     InvalidTag {
         #[label("Encountered an invalid annotation tag: {tag}")]
         span: SourceSpan,
