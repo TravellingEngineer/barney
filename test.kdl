@@ -43,25 +43,25 @@ module env {
 module autotools {
   // autotools::configure
   action configure {
-    // arguments {
-    //   (string) command "./configure"
-    //   (string) prefix {
-    //     default "/usr"
-    //   }
-    //   (list) enable {
-    //     default shared
-    //   }
-    //   (list) disable {
-    //     default static
-    //   }
-    //   (list) with
-    //   (list) without {
+    arguments {
+      (string) command "./configure"
+      (string) prefix {
+        default "/usr"
+      }
+      (list) enable {
+        default shared
+      }
+      (list) disable {
+        default static
+      }
+      (list) with
+      (list) without {
 
-    //   }
-    //   (string) target {
-    //     default (var)env::target
-    //   }
-    // }
+      }
+      (string) target {
+        default (var)env::target
+      }
+    }
 
     // Begin writing a shell script
     execute {

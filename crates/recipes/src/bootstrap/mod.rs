@@ -52,6 +52,9 @@ pub(crate) enum SpecIdentity {
     /// An action within a moduke
     ModuleAction,
 
+    /// An actions expected arguments
+    ModuleActionArguments,
+
     /// Executor definition
     ModuleActionExecute,
 }
