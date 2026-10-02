@@ -17,10 +17,10 @@ use thiserror::Error;
 #[derive(Debug)]
 pub enum Tag {
     /// Local argument `(arg)` reference
-    Argument,
+    ArgumentBinding,
 
     /// Qualified variable `(var)` reference
-    Variable,
+    VariableBinding,
 
     Type(Type),
 }
@@ -36,8 +36,8 @@ impl FromStr for Tag {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "arg" => Ok(Tag::Argument),
-            "var" => Ok(Tag::Variable),
+            "arg" => Ok(Tag::ArgumentBinding),
+            "var" => Ok(Tag::VariableBinding),
             "string" => Ok(Tag::Type(Type::String)),
             "list" => Ok(Tag::Type(Type::List)),
             _ => Err(TagError::UnknownTag(s.to_string())),
@@ -48,8 +48,8 @@ impl FromStr for Tag {
 impl Display for Tag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let r = match self {
-            Tag::Argument => "arg",
-            Tag::Variable => "var",
+            Tag::ArgumentBinding => "arg",
+            Tag::VariableBinding => "var",
             Tag::Type(t) => match t {
                 Type::String => "string",
                 Type::List => "list",
@@ -97,8 +97,8 @@ impl<'a> TaggedValue {
         };
 
         let result = match tag {
-            Tag::Argument => TaggedValue::Argument(entry.value().to_string()),
-            Tag::Variable => TaggedValue::Variable(entry.value().to_string()),
+            Tag::ArgumentBinding => TaggedValue::Argument(entry.value().to_string()),
+            Tag::VariableBinding => TaggedValue::Variable(entry.value().to_string()),
             Tag::Type(_) => TaggedValue::Content(entry.value().to_string()),
         };
 
