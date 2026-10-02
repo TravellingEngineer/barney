@@ -76,8 +76,8 @@ pub enum Type {
 /// i.e action language
 #[derive(Debug)]
 pub enum TaggedValue {
-    Argument(String),
-    Variable(String),
+    ArgumentBinding(String),
+    VariableBinding(String),
     Content(String),
 }
 
@@ -97,8 +97,8 @@ impl<'a> TaggedValue {
         };
 
         let result = match tag {
-            Tag::ArgumentBinding => TaggedValue::Argument(entry.value().to_string()),
-            Tag::VariableBinding => TaggedValue::Variable(entry.value().to_string()),
+            Tag::ArgumentBinding => TaggedValue::ArgumentBinding(entry.value().to_string()),
+            Tag::VariableBinding => TaggedValue::VariableBinding(entry.value().to_string()),
             Tag::Type(_) => TaggedValue::Content(entry.value().to_string()),
         };
 
@@ -109,8 +109,8 @@ impl<'a> TaggedValue {
 impl Display for TaggedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            TaggedValue::Argument(arg) => arg,
-            TaggedValue::Variable(var) => var,
+            TaggedValue::ArgumentBinding(arg) => arg,
+            TaggedValue::VariableBinding(var) => var,
             TaggedValue::Content(c) => c,
         };
         f.write_str(s)
