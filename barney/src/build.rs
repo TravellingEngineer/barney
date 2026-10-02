@@ -34,6 +34,6 @@ pub async fn run_command(path: &Path) -> ExitCode {
             return ExitCode::Abnormal;
         }
     };
-    info!(?distro, config = ?path, "Loaded distro configuration");
+    info!(config = ?path, "Loaded distro configuration: {distro:#?}");
     ExitCode::Normal
 }

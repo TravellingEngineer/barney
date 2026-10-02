@@ -124,7 +124,7 @@ impl Module {
                         if child.identity == SpecIdentity::ModuleActionExecute {
                             trace!("Processing execution script");
                             let statements = Statement::from_kdl_node(child.node).unwrap();
-                            trace!("Statements = {statements:?}")
+                            trace!("Statements = {statements:#?}")
                         }
                     }
                 }
