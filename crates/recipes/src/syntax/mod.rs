@@ -19,6 +19,9 @@ pub use process::process_kdl;
 mod tag;
 pub use tag::{Tag, TaggedValue};
 
+mod script;
+pub use script::{Script, Statement};
+
 /// A "Baked" node when processed via AST
 #[derive(Debug)]
 pub struct ProcessedNode<'a, I>
