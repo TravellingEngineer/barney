@@ -32,7 +32,7 @@ where
 /// Process a single KDL node according to rules and if successful, return built
 /// nodes according to our DSL requirements
 /// If a rule is "spent" in the current context, remove it from the input rules
-fn process_kdl_node<'a, I>(
+pub(crate) fn process_kdl_node<'a, I>(
     node: &'a KdlNode,
     rules: &mut Vec<&NodeSpec<'a, I>>,
 ) -> Result<ProcessedNode<'a, I>, Error>

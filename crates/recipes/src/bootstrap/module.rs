@@ -6,11 +6,13 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use tracing::info;
+use tracing::{info, trace};
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, TaggedValue},
+    syntax::{
+        ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, Statement, TaggedValue,
+    },
 };
 
 /// A module within the bootstrap configuration
@@ -119,7 +121,13 @@ impl Module {
                         exports.insert(k, v);
                     }),
                 SpecIdentity::ModuleAction => {
-                    info!("Got an action: {:?}", child.args.first())
+                    info!("Got an action: {:?}", child.args.first());
+                    for child in child.children {
+                        if child.identity == SpecIdentity::ModuleActionExecute {
+                            trace!("Processing execution script");
+                            Statement::from_kdl_node(child.node).unwrap();
+                        }
+                    }
                 }
                 _ => panic!("derp"),
             }
