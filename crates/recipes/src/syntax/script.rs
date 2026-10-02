@@ -7,8 +7,9 @@
 //! call chains, custody, hashing, etc, without arbitrary
 //! crap polluting the planet.
 
+use std::collections::HashMap;
+
 use kdl::KdlNode;
-use tracing::trace;
 
 use crate::syntax::{
     ArgSpec, NodeDescent, NodeName, NodeSpec, TaggedValue, process::process_kdl_node,
@@ -39,14 +40,15 @@ pub enum Statement {
     },
 
     Execute {
-        /// The keyword / function call
+        /// Functor ID
         keyword: String,
 
         /// A set of arguments
         arguments: Vec<TaggedValue>,
 
         /// A set of properties
-        properties: Vec<TaggedValue>,
+        /// TODO: Used TaggedValue
+        properties: HashMap<String, String>,
     },
 }
 
@@ -115,13 +117,44 @@ static RULES: NodeSpec<'static, StatementID> = NodeSpec {
 
 impl<'a> Statement {
     /// Generate a Statement from a given node
-    pub fn from_kdl_node(node: &'a KdlNode) -> Result<(), super::Error> {
+    pub fn from_kdl_node(node: &'a KdlNode) -> Result<Vec<Statement>, super::Error> {
         let mut rules = vec![&RULES];
         let node = process_kdl_node(node, &mut rules)?;
-        trace!(id = ?node.identity, "Should be a root id");
+        assert_eq!(node.identity, StatementID::Root);
+        let mut statements = vec![];
         for child in node.children {
-            trace!(id = ?&child.identity, "Got a step");
+            match child.identity {
+                StatementID::Root => panic!(),
+                // Processed with condition
+                StatementID::WithCondition => {
+                    // The root level is skipped and we dont do automatic recursion
+                    let processed = Statement::from_kdl_node(child.node)?;
+                    let reference = child.args.first().unwrap().to_string();
+                    statements.push(Statement::WithCondition {
+                        reference,
+                        statements: processed,
+                    })
+                }
+                StatementID::ForEachLoop => {
+                    // Likewise, root level is skipped, not automatic recursion
+                    let processed = Statement::from_kdl_node(child.node)?;
+                    // TODO: Improve like a LOT
+                    let arg = child.args.first().unwrap().to_string();
+                    let target = child.args.get(1).unwrap().to_string();
+                    statements.push(Statement::ForEachLoop {
+                        arg,
+                        target,
+                        statements: processed,
+                    })
+                }
+                // TODO: Disallow child nodes for execute EXPLICITLY
+                StatementID::Execute => statements.push(Statement::Execute {
+                    keyword: child.name().to_string(),
+                    arguments: child.args,
+                    properties: child.props,
+                }),
+            }
         }
-        Ok(())
+        Ok(statements)
     }
 }
