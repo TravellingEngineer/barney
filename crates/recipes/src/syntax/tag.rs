@@ -61,6 +61,21 @@ impl Display for Tag {
 /// Explicitly set type tag
 #[derive(Debug)]
 pub enum Type {
+    /// Accepts string data only
     String,
+
+    /// Accepts (merges) list of string data only
     List,
+}
+
+/// A tagged value is a property or argument in our DSL
+/// which may have been strongly tagged to be an argument or
+/// variable, or is "just" a value (String)
+/// Type enforcements are only actually used in schema building,
+/// i.e action language
+#[derive(Debug)]
+pub enum TaggedValue {
+    Argument(String),
+    Variable(String),
+    Content(String),
 }

@@ -17,7 +17,7 @@ mod process;
 pub use process::process_kdl;
 
 mod tag;
-pub use tag::Tag;
+pub use tag::{Tag, TaggedValue};
 
 /// A "Baked" node when processed via AST
 #[derive(Debug)]
