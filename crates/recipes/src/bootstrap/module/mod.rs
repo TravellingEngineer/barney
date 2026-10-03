@@ -45,6 +45,15 @@ pub enum Error {
     #[error("action error")]
     #[diagnostic(transparent)]
     Action(#[from] action::Error),
+
+    #[error("fatal: unsupported node")]
+    #[diagnostic()]
+    UnsupportedNode {
+        #[label("unsupported node: {id:?}")]
+        span: SourceSpan,
+
+        id: SpecIdentity,
+    },
 }
 
 /// Rules for the module nodespec
@@ -151,7 +160,12 @@ impl Module {
                     let action = Action::new(&child)?;
                     actions.insert(action.id.clone(), action);
                 }
-                _ => panic!("derp"),
+                _ => {
+                    return Err(Error::UnsupportedNode {
+                        span: child.node.span(),
+                        id: child.identity,
+                    });
+                }
             }
         }
 
