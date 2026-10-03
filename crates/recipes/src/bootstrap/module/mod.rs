@@ -6,12 +6,15 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
-use tracing::{info, trace};
+use tracing::trace;
 
 use crate::{
     bootstrap::SpecIdentity,
     syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, Script, TaggedValue},
 };
+
+mod action;
+pub use action::Action;
 
 /// A module within the bootstrap configuration
 ///
@@ -23,6 +26,8 @@ pub struct Module {
     // TODO: Disallow any tags but var/arg
     vars: HashMap<String, TaggedValue>,
     exports: HashMap<String, TaggedValue>,
+    // TODO: Consider sets
+    actions: HashMap<String, Action>,
 }
 
 /// Rules for the module nodespec
@@ -99,6 +104,7 @@ impl Module {
         let id = node.args.into_iter().next().unwrap();
         let mut exports = HashMap::new();
         let mut vars = HashMap::new();
+        let mut actions = HashMap::new();
 
         for child in node.children {
             match child.identity {
@@ -119,14 +125,18 @@ impl Module {
                         exports.insert(k, v);
                     }),
                 SpecIdentity::ModuleAction => {
-                    info!("Got an action: {:?}", child.args.first());
+                    let action_id = child.args.first().unwrap();
+                    trace!(module = ?id, "Loading action: {action_id}");
+                    let action = Action {
+                        id: action_id.to_string(),
+                    };
                     for child in child.children {
                         if child.identity == SpecIdentity::ModuleActionExecute {
-                            trace!("Processing execution script");
                             let script = Script::from_kdl_node(child.node).unwrap();
                             trace!("Script = {script:#?}")
                         }
                     }
+                    actions.insert(action.id.clone(), action);
                 }
                 _ => panic!("derp"),
             }
@@ -136,6 +146,7 @@ impl Module {
             id: id.to_string(),
             exports,
             vars,
+            actions,
         }
     }
 
@@ -152,5 +163,10 @@ impl Module {
     /// Return all variable keys
     pub fn vars(&self) -> Vec<String> {
         self.vars.keys().cloned().collect_vec()
+    }
+
+    /// Return all action IDs
+    pub fn actions(&self) -> Vec<String> {
+        self.actions.keys().cloned().collect_vec()
     }
 }
