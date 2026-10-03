@@ -8,11 +8,10 @@ use std::collections::HashMap;
 use itertools::Itertools;
 use miette::{Diagnostic, SourceSpan};
 use thiserror::Error;
-use tracing::trace;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, Script, TaggedValue},
+    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, TaggedValue},
 };
 
 mod action;
@@ -42,6 +41,10 @@ pub enum Error {
         #[label("fatal: missing argument")]
         span: SourceSpan,
     },
+
+    #[error("action error")]
+    #[diagnostic(transparent)]
+    Action(#[from] action::Error),
 }
 
 /// Rules for the module nodespec
@@ -145,17 +148,7 @@ impl Module {
                         exports.insert(k, v);
                     }),
                 SpecIdentity::ModuleAction => {
-                    let action_id = child.args.first().unwrap();
-                    trace!(module = ?id, "Loading action: {action_id}");
-                    let action = Action {
-                        id: action_id.to_string(),
-                    };
-                    for child in child.children {
-                        if child.identity == SpecIdentity::ModuleActionExecute {
-                            let script = Script::from_kdl_node(child.node).unwrap();
-                            trace!("Script = {script:#?}")
-                        }
-                    }
+                    let action = Action::new(&child)?;
                     actions.insert(action.id.clone(), action);
                 }
                 _ => panic!("derp"),

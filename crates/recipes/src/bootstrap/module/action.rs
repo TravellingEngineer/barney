@@ -3,6 +3,15 @@
 
 //! Bootstrap configuration `module` actions
 
+use itertools::Itertools;
+use miette::{Diagnostic, SourceSpan};
+use thiserror::Error;
+
+use crate::{
+    bootstrap::SpecIdentity,
+    syntax::{self, ProcessedNode, Script, TaggedValue},
+};
+
 /// An Action as defined in the modules exported by various
 /// KDL files.
 /// These actions provide a modern alternative to macro-rich
@@ -17,4 +26,81 @@ pub struct Action {
     pub(super) id: String,
     // args:
     // execute:
+    _execute: Option<Script>,
+}
+
+/// Action specific error handling
+#[derive(Error, Diagnostic, Debug)]
+pub enum Error {
+    #[error("processing arguments")]
+    #[diagnostic()]
+    OneArgsBlock {
+        #[label("only one arguments block supported")]
+        span: SourceSpan,
+    },
+
+    #[error("processing execute")]
+    #[diagnostic()]
+    OneExecuteBlock {
+        #[label("only one execute block supported")]
+        span: SourceSpan,
+    },
+
+    #[error("processing execute statements")]
+    #[diagnostic()]
+    Syntax(#[from] syntax::Error),
+}
+
+impl<'a> Action {
+    /// Produce a new Action from the given processed node
+    pub(super) fn new(node: &'a ProcessedNode<SpecIdentity>) -> Result<Self, super::Error> {
+        assert_eq!(node.identity, SpecIdentity::ModuleAction);
+        // Grab the action ID
+        let action_id = node
+            .args
+            .first()
+            .ok_or_else(|| super::Error::MissingArgument {
+                span: node.node.span(),
+            })?;
+        // absolutely cant have errors
+        assert!(matches!(action_id, TaggedValue::Content(_)));
+        let id = action_id.to_string();
+
+        // grab all Args
+        let args = node
+            .children
+            .iter()
+            .filter(|n| n.identity == SpecIdentity::ModuleActionArguments)
+            .collect_vec();
+
+        // grab arguments set and enforce 1 occurance
+        if !args.is_empty() {
+            let _args_root = args.iter().exactly_one().map_err(|_| Error::OneArgsBlock {
+                span: node.node.span(),
+            })?;
+        }
+
+        let execs = node
+            .children
+            .iter()
+            .filter(|n| n.identity == SpecIdentity::ModuleActionExecute)
+            .collect_vec();
+
+        let execute = if !execs.is_empty() {
+            let exec_root = execs
+                .iter()
+                .exactly_one()
+                .map_err(|_| Error::OneExecuteBlock {
+                    span: node.node.span(),
+                })?;
+            Some(Script::from_kdl_node(exec_root.node).map_err(Error::Syntax)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            id,
+            _execute: execute,
+        })
+    }
 }
