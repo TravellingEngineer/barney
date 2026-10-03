@@ -46,8 +46,8 @@ pub enum Error {
         span: SourceSpan,
     },
 
-    #[error("processing execute statements")]
-    #[diagnostic()]
+    #[error(transparent)]
+    #[diagnostic(transparent)]
     Syntax(#[from] syntax::Error),
 }
 
