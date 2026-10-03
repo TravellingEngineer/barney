@@ -6,7 +6,7 @@
 use std::{fs, io, path::Path};
 
 use kdl::{KdlDocument, KdlError};
-use miette::{Diagnostic, NamedSource};
+use miette::{Diagnostic, NamedSource, SourceSpan};
 use thiserror::Error;
 
 mod phase;
@@ -26,7 +26,7 @@ pub struct BootstrapSpec {
 
 #[repr(usize)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
-pub(crate) enum SpecIdentity {
+pub enum SpecIdentity {
     /// Root phase
     Phase,
     /// The `variables` block itself
@@ -94,6 +94,28 @@ pub enum Error {
         #[diagnostic_source(transparent)]
         source: syntax::Error,
     },
+
+    #[error("Module parsing")]
+    #[diagnostic()]
+    Module {
+        #[source_code]
+        src: NamedSource<String>,
+
+        #[diagnostic_source(transparent)]
+        source: module::Error,
+    },
+
+    #[error("unsupported node")]
+    #[diagnostic()]
+    UnsupportedID {
+        #[source_code]
+        src: NamedSource<String>,
+
+        id: SpecIdentity,
+
+        #[label("unsupported SpecIdentity node: {id:?}")]
+        span: SourceSpan,
+    },
 }
 
 impl BootstrapSpec {
@@ -127,8 +149,21 @@ impl BootstrapSpec {
                 SpecIdentity::Phase => {
                     phases.push(Phase::new(node));
                 }
-                SpecIdentity::Module => modules.push(Module::new(node)),
-                _ => panic!("unsupported descent"),
+                SpecIdentity::Module => {
+                    let module = Module::new(node).map_err(|e| Error::Module {
+                        src: source.clone(),
+                        source: e,
+                    })?;
+                    modules.push(module);
+                }
+                _ => {
+                    // essentially unimplemented()
+                    return Err(Error::UnsupportedID {
+                        src: source.clone(),
+                        id: node.identity,
+                        span: node.node.span(),
+                    });
+                }
             }
         }
 

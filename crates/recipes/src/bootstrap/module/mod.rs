@@ -6,6 +6,8 @@
 use std::collections::HashMap;
 
 use itertools::Itertools;
+use miette::{Diagnostic, SourceSpan};
+use thiserror::Error;
 use tracing::trace;
 
 use crate::{
@@ -28,6 +30,18 @@ pub struct Module {
     exports: HashMap<String, TaggedValue>,
     // TODO: Consider sets
     actions: HashMap<String, Action>,
+}
+
+/// A `module` specific error
+#[derive(Debug, Error, Diagnostic)]
+pub enum Error {
+    // Placeholder while we kick error handling up the bum
+    #[error("fatal: missing argument")]
+    #[diagnostic()]
+    MissingArgument {
+        #[label("fatal: missing argument")]
+        span: SourceSpan,
+    },
 }
 
 /// Rules for the module nodespec
@@ -99,9 +113,15 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
 };
 
 impl Module {
-    pub(crate) fn new(node: ProcessedNode<SpecIdentity>) -> Self {
+    pub(crate) fn new(node: ProcessedNode<SpecIdentity>) -> Result<Self, Error> {
         // Pull the ID out
-        let id = node.args.into_iter().next().unwrap();
+        let id = node
+            .args
+            .into_iter()
+            .next()
+            .ok_or_else(|| Error::MissingArgument {
+                span: node.node.span(),
+            })?;
         let mut exports = HashMap::new();
         let mut vars = HashMap::new();
         let mut actions = HashMap::new();
@@ -142,12 +162,12 @@ impl Module {
             }
         }
 
-        Self {
+        Ok(Self {
             id: id.to_string(),
             exports,
             vars,
             actions,
-        }
+        })
     }
 
     /// Return the module ID
