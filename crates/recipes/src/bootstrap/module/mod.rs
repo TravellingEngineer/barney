@@ -12,8 +12,8 @@ use thiserror::Error;
 use crate::{
     bootstrap::SpecIdentity,
     syntax::{
-        ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, SymbolError, SymbolTable,
-        TaggedValue,
+        ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, Symbol, SymbolError, SymbolTable,
+        SymbolType, TaggedValue,
     },
 };
 
@@ -59,11 +59,10 @@ pub enum Error {
     },
 
     #[error("symbol processing")]
-    #[diagnostic()]
+    #[diagnostic(help = "Defined symbols must not contain the `::` characters")]
     Symbol {
-        #[label("symbols")]
+        #[label("illegal symbol name")]
         span: SourceSpan,
-
         #[source]
         source: SymbolError,
     },
@@ -140,7 +139,7 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
 impl Module {
     pub(crate) fn new(
         node: ProcessedNode<SpecIdentity>,
-        _symbols: &mut SymbolTable,
+        symbols: &mut SymbolTable,
     ) -> Result<Self, Error> {
         // Pull the ID out
         let id = node
@@ -153,6 +152,7 @@ impl Module {
         let mut exports = HashMap::new();
         let mut vars = HashMap::new();
         let mut actions = HashMap::new();
+        let namespace = id.to_string();
 
         for child in node.children {
             match child.identity {
@@ -174,6 +174,12 @@ impl Module {
                     }),
                 SpecIdentity::ModuleAction => {
                     let action = Action::new(&child)?;
+                    symbols
+                        .insert(Symbol::new(&namespace, action.id(), SymbolType::Function))
+                        .map_err(|e| Error::Symbol {
+                            span: child.node.span(),
+                            source: e,
+                        })?;
                     actions.insert(action.id.clone(), action);
                 }
                 _ => {
@@ -186,7 +192,7 @@ impl Module {
         }
 
         Ok(Self {
-            id: id.to_string(),
+            id: namespace,
             exports,
             vars,
             actions,

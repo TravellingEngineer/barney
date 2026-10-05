@@ -103,4 +103,9 @@ impl<'a> Action {
             _execute: execute,
         })
     }
+
+    /// Return ID reference
+    pub fn id(&self) -> &str {
+        &self.id
+    }
 }
