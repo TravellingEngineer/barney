@@ -22,6 +22,9 @@ pub use tag::{Tag, TaggedValue};
 mod script;
 pub use script::{Script, Statement};
 
+mod symbol;
+pub use symbol::Symbol;
+
 /// A "Baked" node when processed via AST
 #[derive(Debug)]
 pub struct ProcessedNode<'a, I>
