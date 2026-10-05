@@ -14,7 +14,7 @@ pub use phase::Phase;
 mod module;
 pub use module::Module;
 
-use crate::syntax::{self, NodeSpec};
+use crate::syntax::{self, NodeSpec, SymbolTable};
 
 /// A distro definition is taken from a bootstrap.kdl
 ///
@@ -22,6 +22,7 @@ use crate::syntax::{self, NodeSpec};
 pub struct BootstrapSpec {
     phases: Vec<Phase>,
     modules: Vec<Module>,
+    symbols: SymbolTable,
 }
 
 #[repr(usize)]
@@ -144,13 +145,15 @@ impl BootstrapSpec {
 
         let mut phases = vec![];
         let mut modules = vec![];
+        let mut symbols = SymbolTable::new();
+
         for node in nodes.into_iter() {
             match node.identity {
                 SpecIdentity::Phase => {
                     phases.push(Phase::new(node));
                 }
                 SpecIdentity::Module => {
-                    let module = Module::new(node).map_err(|e| Error::Module {
+                    let module = Module::new(node, &mut symbols).map_err(|e| Error::Module {
                         src: source.clone(),
                         source: e,
                     })?;
@@ -167,7 +170,11 @@ impl BootstrapSpec {
             }
         }
 
-        Ok(Self { phases, modules })
+        Ok(Self {
+            phases,
+            modules,
+            symbols,
+        })
     }
 
     /// Access the underlying phases

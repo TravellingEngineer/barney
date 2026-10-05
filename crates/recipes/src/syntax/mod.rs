@@ -23,7 +23,7 @@ mod script;
 pub use script::{Script, Statement};
 
 mod symbol;
-pub use symbol::{Symbol, SymbolTable};
+pub use symbol::{Symbol, SymbolError, SymbolTable, SymbolType};
 
 /// A "Baked" node when processed via AST
 #[derive(Debug)]

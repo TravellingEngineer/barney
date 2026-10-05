@@ -11,7 +11,10 @@ use thiserror::Error;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, TaggedValue},
+    syntax::{
+        ArgSpec, NodeDescent, NodeName, NodeSpec, ProcessedNode, SymbolError, SymbolTable,
+        TaggedValue,
+    },
 };
 
 mod action;
@@ -53,6 +56,16 @@ pub enum Error {
         span: SourceSpan,
 
         id: SpecIdentity,
+    },
+
+    #[error("symbol processing")]
+    #[diagnostic()]
+    Symbol {
+        #[label("symbols")]
+        span: SourceSpan,
+
+        #[source]
+        source: SymbolError,
     },
 }
 
@@ -125,7 +138,10 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
 };
 
 impl Module {
-    pub(crate) fn new(node: ProcessedNode<SpecIdentity>) -> Result<Self, Error> {
+    pub(crate) fn new(
+        node: ProcessedNode<SpecIdentity>,
+        _symbols: &mut SymbolTable,
+    ) -> Result<Self, Error> {
         // Pull the ID out
         let id = node
             .args

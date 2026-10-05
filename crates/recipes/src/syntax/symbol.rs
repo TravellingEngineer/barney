@@ -11,12 +11,25 @@ use std::{
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum Error {
+pub enum SymbolError {
     #[error("namespace contains special prefix chars")]
     NamespaceContainsPrefixChars,
 
     #[error("id contains special prefix chars")]
     IdContainsPrefixChars,
+}
+
+#[repr(usize)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Debug)]
+pub enum SymbolType {
+    // Defines a variable
+    Variable,
+
+    // Defines a (local) argument
+    Argument,
+
+    // Defines/provides a function
+    Function,
 }
 
 /// A Symbol is essentially an encoding of symbol and namespace
@@ -31,6 +44,8 @@ pub struct Symbol {
 
     // The specific symbol ID, ie `configure`
     id: String,
+
+    kind: SymbolType,
 }
 
 impl Display for Symbol {
@@ -41,10 +56,11 @@ impl Display for Symbol {
 
 impl Symbol {
     /// Create a new symbol
-    pub fn new(namespace: &str, id: &str) -> Self {
+    pub fn new(namespace: &str, id: &str, kind: SymbolType) -> Self {
         Self {
             namespace: namespace.to_string(),
             id: id.to_string(),
+            kind,
         }
     }
 
@@ -56,6 +72,11 @@ impl Symbol {
     /// Return a reference to the ID
     pub fn id(&self) -> &str {
         &self.id
+    }
+
+    /// Returns the kind of symbol
+    pub fn kind(&self) -> SymbolType {
+        self.kind
     }
 }
 
@@ -76,11 +97,11 @@ impl<'a> SymbolTable {
     }
 
     /// Insert and take ownership of a symbol
-    pub fn insert(&mut self, symbol: Symbol) -> Result<(), Error> {
+    pub fn insert(&mut self, symbol: Symbol) -> Result<(), SymbolError> {
         if symbol.namespace().contains("::") {
-            Err(Error::NamespaceContainsPrefixChars)
+            Err(SymbolError::NamespaceContainsPrefixChars)
         } else if symbol.id().contains("::") {
-            Err(Error::IdContainsPrefixChars)
+            Err(SymbolError::IdContainsPrefixChars)
         } else {
             let fqdn = symbol.to_string();
             self.namespaces.insert(symbol.namespace.to_owned());
@@ -116,16 +137,19 @@ mod tests {
         tab.insert(Symbol {
             namespace: "autotools".to_string(),
             id: "configure".to_string(),
+            kind: SymbolType::Function,
         })
         .expect("good symbol should work");
         tab.insert(Symbol {
             namespace: "autotools".to_string(),
             id: "make".to_string(),
+            kind: SymbolType::Function,
         })
         .expect("good symbol should work");
         tab.insert(Symbol {
             namespace: "core".to_string(),
             id: "emit".to_string(),
+            kind: SymbolType::Function,
         })
         .expect("good symbol should work");
         assert_eq!(tab.namespace_symbols("").collect_vec().len(), 0);
