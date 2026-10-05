@@ -90,12 +90,11 @@ impl<'a> SymbolTable {
     }
 
     /// Allow symbol enumeration by way of a fixed prefix
-    pub fn namespace_symbols(&'a self, namespace: &str) -> impl Iterator<Item = &'a Symbol> {
+    pub fn namespace_symbols<'b>(&'a self, namespace: &'b str) -> impl Iterator<Item = &'a Symbol> {
         let prefixed = format!("{}::", namespace);
-        let namespace_cz = namespace.to_string();
         self.mapping
             .range(prefixed..)
-            .take_while(move |(_, s)| s.namespace == namespace_cz)
+            .take_while(move |(_, s)| s.namespace == namespace)
             .map(|(_, s)| s)
     }
 
