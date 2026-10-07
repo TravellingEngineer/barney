@@ -22,7 +22,7 @@ use crate::syntax::{self, NodeSpec, SymbolTable};
 pub struct BootstrapSpec {
     phases: Vec<Phase>,
     modules: Vec<Module>,
-    symbols: SymbolTable,
+    _symbols: SymbolTable,
 }
 
 #[repr(usize)]
@@ -173,7 +173,7 @@ impl BootstrapSpec {
         Ok(Self {
             phases,
             modules,
-            symbols,
+            _symbols: symbols,
         })
     }
 
