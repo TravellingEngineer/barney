@@ -99,7 +99,9 @@ impl<'a> TaggedValue {
         let result = match tag {
             Tag::ArgumentBinding => TaggedValue::ArgumentBinding(entry.value().to_string()),
             Tag::VariableBinding => TaggedValue::VariableBinding(entry.value().to_string()),
-            Tag::Type(_) => TaggedValue::Content(entry.value().to_string()),
+            Tag::Type(_) => {
+                TaggedValue::Content(entry.value().as_string().unwrap_or_default().to_owned())
+            }
         };
 
         Ok(result)
