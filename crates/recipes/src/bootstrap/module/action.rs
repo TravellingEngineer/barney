@@ -9,7 +9,7 @@ use thiserror::Error;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{self, ProcessedNode, Script, TaggedValue},
+    syntax::{self, ArgSchema, ProcessedNode, Script, TaggedValue},
 };
 
 /// An Action as defined in the modules exported by various
@@ -75,9 +75,11 @@ impl<'a> Action {
 
         // grab arguments set and enforce 1 occurance
         if !args.is_empty() {
-            let _args_root = args.iter().exactly_one().map_err(|_| Error::OneArgsBlock {
+            let args_root = args.iter().exactly_one().map_err(|_| Error::OneArgsBlock {
                 span: node.node.span(),
             })?;
+            // TODO: Use this !
+            let _ = ArgSchema::from_kdl_node(args_root.node).map_err(Error::Syntax)?;
         }
 
         let execs = node

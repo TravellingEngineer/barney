@@ -25,6 +25,9 @@ pub use script::{Script, Statement};
 mod symbol;
 pub use symbol::{Symbol, SymbolError, SymbolTable, SymbolType};
 
+mod argschema;
+pub use argschema::ArgSchema;
+
 /// A "Baked" node when processed via AST
 #[derive(Debug)]
 pub struct ProcessedNode<'a, I>
