@@ -114,8 +114,8 @@ pub(super) static RULES: NodeSpec<'static, SpecIdentity> = NodeSpec {
             props: &[],
             children: &[
                 NodeSpec {
-                    name: NodeName::Static("arguments"),
-                    identity: SpecIdentity::ModuleActionArguments,
+                    name: NodeName::Static("properties"),
+                    identity: SpecIdentity::ModuleActionProperties,
                     args: ArgSpec::None,
                     props: &[],
                     children: &[],

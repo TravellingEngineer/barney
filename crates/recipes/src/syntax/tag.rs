@@ -16,8 +16,8 @@ use thiserror::Error;
 /// accessor method.
 #[derive(Debug)]
 pub enum Tag {
-    /// Local argument `(arg)` reference
-    ArgumentBinding,
+    /// Local property `(prop)` reference
+    PropertyBinding,
 
     /// Qualified variable `(var)` reference
     VariableBinding,
@@ -36,7 +36,7 @@ impl FromStr for Tag {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "arg" => Ok(Tag::ArgumentBinding),
+            "prop" => Ok(Tag::PropertyBinding),
             "var" => Ok(Tag::VariableBinding),
             "string" => Ok(Tag::Type(Type::String)),
             "list" => Ok(Tag::Type(Type::List)),
@@ -48,7 +48,7 @@ impl FromStr for Tag {
 impl Display for Tag {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let r = match self {
-            Tag::ArgumentBinding => "arg",
+            Tag::PropertyBinding => "prop",
             Tag::VariableBinding => "var",
             Tag::Type(t) => match t {
                 Type::String => "string",
@@ -76,7 +76,7 @@ pub enum Type {
 /// i.e action language
 #[derive(Debug)]
 pub enum TaggedValue {
-    ArgumentBinding(String),
+    PropertyBinding(String),
     VariableBinding(String),
     Content(String),
 }
@@ -97,7 +97,7 @@ impl<'a> TaggedValue {
         };
 
         let result = match tag {
-            Tag::ArgumentBinding => TaggedValue::ArgumentBinding(entry.value().to_string()),
+            Tag::PropertyBinding => TaggedValue::PropertyBinding(entry.value().to_string()),
             Tag::VariableBinding => TaggedValue::VariableBinding(entry.value().to_string()),
             Tag::Type(_) => {
                 TaggedValue::Content(entry.value().as_string().unwrap_or_default().to_owned())
@@ -111,7 +111,7 @@ impl<'a> TaggedValue {
 impl Display for TaggedValue {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let s = match self {
-            TaggedValue::ArgumentBinding(arg) => arg,
+            TaggedValue::PropertyBinding(arg) => arg,
             TaggedValue::VariableBinding(var) => var,
             TaggedValue::Content(c) => c,
         };

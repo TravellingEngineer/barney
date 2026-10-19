@@ -9,7 +9,7 @@ use thiserror::Error;
 
 use crate::{
     bootstrap::SpecIdentity,
-    syntax::{self, ArgSchema, ProcessedNode, Script, TaggedValue},
+    syntax::{self, ProcessedNode, Script, TaggedValue},
 };
 
 /// An Action as defined in the modules exported by various
@@ -34,8 +34,8 @@ pub struct Action {
 pub enum Error {
     #[error("processing arguments")]
     #[diagnostic()]
-    OneArgsBlock {
-        #[label("only one arguments block supported")]
+    OnePropertiesBlock {
+        #[label("only one properties block supported")]
         span: SourceSpan,
     },
 
@@ -67,19 +67,21 @@ impl<'a> Action {
         let id = action_id.to_string();
 
         // grab all Args
-        let args = node
+        let props = node
             .children
             .iter()
-            .filter(|n| n.identity == SpecIdentity::ModuleActionArguments)
+            .filter(|n| n.identity == SpecIdentity::ModuleActionProperties)
             .collect_vec();
 
         // grab arguments set and enforce 1 occurance
-        if !args.is_empty() {
-            let args_root = args.iter().exactly_one().map_err(|_| Error::OneArgsBlock {
-                span: node.node.span(),
-            })?;
-            // TODO: Use this !
-            let _ = ArgSchema::from_kdl_node(args_root.node).map_err(Error::Syntax)?;
+        if !props.is_empty() {
+            let _props_root =
+                props
+                    .iter()
+                    .exactly_one()
+                    .map_err(|_| Error::OnePropertiesBlock {
+                        span: node.node.span(),
+                    })?;
         }
 
         let execs = node

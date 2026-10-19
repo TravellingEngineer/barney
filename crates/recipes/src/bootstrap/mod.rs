@@ -53,8 +53,8 @@ pub enum SpecIdentity {
     /// An action within a moduke
     ModuleAction,
 
-    /// An actions expected arguments
-    ModuleActionArguments,
+    /// An actions expected properties
+    ModuleActionProperties,
 
     /// Executor definition
     ModuleActionExecute,
