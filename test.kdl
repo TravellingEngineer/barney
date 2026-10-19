@@ -59,13 +59,13 @@ module autotools {
       with enable {
         emit " "
         foreach prop enable {
-          emit "--enable-" (prop)arg
+          emit "--enable-" (prop)prop
         }
       }
       with disable {
         emit " "
-        foreach arg disable {
-          emit "--disable-" (var)arg
+        foreach prop disable {
+          emit "--disable-" (var)prop
         }
       }
       with target {
