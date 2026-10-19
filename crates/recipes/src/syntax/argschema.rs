@@ -3,6 +3,8 @@
 
 //! Argument schema parsing
 
+use std::collections::HashMap;
+
 use kdl::KdlNode;
 
 use crate::syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, process::process_kdl_node};
@@ -13,7 +15,24 @@ use crate::syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, process::process_k
 /// within a root, each node having an explicit annotation type
 /// ie as understood within TaggedValue
 #[derive(Debug)]
-pub struct ArgSchema {}
+pub struct ArgSchema {
+    _ruleset: HashMap<DynamicRuleID, DynamicRule>,
+    _last_id: usize,
+}
+
+/// Doesn't do anything useful yet but will coerce into NodeSpec<'a>
+#[derive(Debug)]
+pub struct DynamicRule {}
+
+/// newtyping for NodeSchema rules to permit dynamic evaluation
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
+pub struct DynamicRuleID(usize);
+
+impl From<DynamicRuleID> for usize {
+    fn from(val: DynamicRuleID) -> Self {
+        val.0
+    }
+}
 
 #[repr(usize)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
@@ -41,12 +60,17 @@ static RULES: NodeSpec<'static, ArgSchemaID> = NodeSpec {
     descent: NodeDescent::Never,
 };
 
-impl<'a> ArgSchema {
-    pub fn from_kdl_node(root: &'a KdlNode) -> Result<Self, super::Error> {
+impl ArgSchema {
+    pub fn from_kdl_node(root: &KdlNode) -> Result<Self, super::Error> {
         let mut rules = vec![&RULES];
         let processed = process_kdl_node(root, &mut rules)?;
         assert_eq!(processed.identity, ArgSchemaID::Root);
 
-        Ok(Self {})
+        let ruleset = HashMap::new();
+
+        Ok(Self {
+            _ruleset: ruleset,
+            _last_id: 0,
+        })
     }
 }
