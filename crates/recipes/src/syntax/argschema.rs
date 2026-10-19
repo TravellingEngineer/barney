@@ -73,5 +73,6 @@ impl<'a> ArgSchema<'a> {
     /// Yield as a set of "static" rule types to integrate with the existing rule loops
     /// explicitly only permitted for executor calls inside script blocks
     pub fn rules(&self) -> impl Iterator<Item = &NodeSpec<'a, DynamicRuleID>> {
-        self.ruleset.values()}
+        self.ruleset.values()
+    }
 }
