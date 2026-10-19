@@ -15,14 +15,10 @@ use crate::syntax::{ArgSpec, NodeDescent, NodeName, NodeSpec, process::process_k
 /// within a root, each node having an explicit annotation type
 /// ie as understood within TaggedValue
 #[derive(Debug)]
-pub struct ArgSchema {
-    _ruleset: HashMap<DynamicRuleID, DynamicRule>,
+pub struct ArgSchema<'a> {
+    ruleset: HashMap<DynamicRuleID, NodeSpec<'a, DynamicRuleID>>,
     _last_id: usize,
 }
-
-/// Doesn't do anything useful yet but will coerce into NodeSpec<'a>
-#[derive(Debug)]
-pub struct DynamicRule {}
 
 /// newtyping for NodeSchema rules to permit dynamic evaluation
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone)]
@@ -60,7 +56,7 @@ static RULES: NodeSpec<'static, ArgSchemaID> = NodeSpec {
     descent: NodeDescent::Never,
 };
 
-impl ArgSchema {
+impl<'a> ArgSchema<'a> {
     pub fn from_kdl_node(root: &KdlNode) -> Result<Self, super::Error> {
         let mut rules = vec![&RULES];
         let processed = process_kdl_node(root, &mut rules)?;
@@ -69,8 +65,13 @@ impl ArgSchema {
         let ruleset = HashMap::new();
 
         Ok(Self {
-            _ruleset: ruleset,
+            ruleset,
             _last_id: 0,
         })
     }
+
+    /// Yield as a set of "static" rule types to integrate with the existing rule loops
+    /// explicitly only permitted for executor calls inside script blocks
+    pub fn rules(&self) -> impl Iterator<Item = &NodeSpec<'a, DynamicRuleID>> {
+        self.ruleset.values()}
 }
