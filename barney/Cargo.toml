@@ -10,5 +10,3 @@ miette = { workspace = true, features = ["fancy"]}
 tracing.workspace = true
 tokio = { workspace = true, features = ["full"]}
 indicatif = { workspace = true, features = ["tokio"] }
-tracing-indicatif.workspace = true
-tracing-subscriber = { workspace = true, features = ["env-filter"]}

@@ -7,7 +7,6 @@ use std::path::Path;
 
 use recipes::bootstrap::BootstrapSpec;
 use tracing::{error, info};
-use tracing_indicatif::suspend_tracing_indicatif;
 
 use crate::ExitCode;
 
@@ -28,9 +27,7 @@ pub async fn run_command(path: &Path) -> ExitCode {
         Err(e) => {
             let report = miette::Report::new(e);
             error!(config = ?path, "Failed to load bootstrap configuration");
-            suspend_tracing_indicatif(|| {
-                eprintln!("{report:?}");
-            });
+            eprintln!("{report:?}");
             return ExitCode::Abnormal;
         }
     };
