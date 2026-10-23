@@ -10,3 +10,9 @@ pub enum ExitCode {
     Normal = 0,
     Abnormal,
 }
+
+impl From<ExitCode> for i32 {
+    fn from(val: ExitCode) -> Self {
+        val as i32
+    }
+}

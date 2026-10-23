@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Ikey Doherty
 // SPDX-License-Identifier: MPL-2.0
 
-use std::path::PathBuf;
+use std::{path::PathBuf, process};
 
 use barney::build;
 use clap::{Parser, Subcommand};
@@ -37,7 +37,7 @@ fn main() {
 async fn priv_async_main() {
     let cli = CliEntry::parse();
 
-    let exit_code = match &cli.command {
+    let result = match &cli.command {
         // handle build command
         Commands::Build { path } => {
             let path = path.clone().unwrap_or(PathBuf::from("bootstrap.kdl"));
@@ -45,5 +45,9 @@ async fn priv_async_main() {
         }
     };
 
-    std::process::exit(exit_code as i32)
+    // TODO: capture intended failure code from decorated error
+    if let Err(e) = result {
+        eprintln!("{e:?}");
+        process::exit(barney::ExitCode::Abnormal.into())
+    }
 }

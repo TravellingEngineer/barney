@@ -5,32 +5,21 @@
 
 use std::path::Path;
 
+use miette::{Context, IntoDiagnostic};
 use recipes::bootstrap::BootstrapSpec;
-use tracing::{error, info};
-
-use crate::ExitCode;
+use tracing::info;
 
 // Load bootstrap config, handle emission of miette report if needed
-pub async fn run_command(path: &Path) -> ExitCode {
+pub async fn run_command(path: &Path) -> Result<(), miette::Report> {
     // Ensure we have a real path firstly!
-    let path = match path.canonicalize() {
-        Ok(path) => path,
-        Err(e) => {
-            error!(path = ?&path, error = ?e, "Failed to canonicalize config path");
-            return ExitCode::Abnormal;
-        }
-    };
-
-    // Load the bootstrap configuration
-    let distro = match BootstrapSpec::from_path(&path) {
-        Ok(d) => d,
-        Err(e) => {
-            let report = miette::Report::new(e);
-            error!(config = ?path, "Failed to load bootstrap configuration");
-            eprintln!("{report:?}");
-            return ExitCode::Abnormal;
-        }
-    };
+    let path = path
+        .canonicalize()
+        .into_diagnostic()
+        .wrap_err_with(|| format!("Failed to resolve path: {path:?}"))?;
+    let distro = BootstrapSpec::from_path(&path)?;
     info!(config = ?path, "Loaded distro configuration: {distro:#?}");
-    ExitCode::Normal
+
+    println!("Distro loaded: {distro:#?}");
+
+    Ok(())
 }
